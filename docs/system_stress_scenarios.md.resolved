@@ -1,0 +1,138 @@
+# 🧪 System Stress & Edge Case Scenarios
+
+This document outlines comprehensive analysis and stress scenarios for each major feature of the EdSentre system. The goal is to identify potential failure points, complex edge cases, and business logic gaps before they occur in production.
+
+---
+
+## 1. 💰 Payment & Financial System (نظام المدفوعات والمالية)
+
+### 🔍 System Overview
+The Payment ecosystem encompasses:
+1.  **Course Pricing**: Monthly fees, per-session fees.
+2.  **Student Billing**: Generating invoices, tracking debt, smart billing (mixed modes).
+3.  **Payment Processing**: Recording transactions (Cash, Vodafone Cash, etc.), receipts.
+4.  **Teacher Salaries**: Calculating dues based on fixed salary, session count, or revenue percentage.
+5.  **Financial Reporting**: Monthly revenue, debt reports, profitability.
+
+### ⚠️ Stress Scenarios & Edge Cases
+
+#### A. Pricing & subscriptions (التسعير والاشتراكات)
+1.  **The "Mid-Month Price Change" Scenario**
+    *   **Situation**: Center changes Physics course price from 200 to 250 on the 15th of the month.
+    *   **Risk**: Does this affect students who already paid? Does it affect students who haven't paid yet for *this* month?
+    *   **Expected**: Should only apply to *next* billing cycle, or pro-rated? Current logic check required.
+
+2.  **The "Mixed Billing" Conflict**
+    *   **Situation**: A student is in 3 groups: Physics (Monthly), Math (Per-Session), Chemistry (Monthly).
+    *   **Risk**: Invoice generation complexity. How is "Total Due" calculated? If they pay 100 LE, where does it go? Physics or Math?
+    *   **Complexity**: Allocating partial payments across different billing types.
+
+#### B. Student Accounts (حسابات الطلاب)
+3.  **The "Ghost Student" (Deleted with Debt)**
+    *   **Situation**: Admin deletes a student who owes 500 LE.
+    *   **Risk**: Financial reports (Expected Revenue) might break or show "Unknown Student". data integrity of `student_invoices`.
+    *   **Scenario**: Re-adding the student later—do they regain their history?
+
+4.  **The "Double Payment" Race Condition**
+    *   **Situation**: Admin A and Admin B both record a 200 LE payment for the same student at the exact same second.
+    *   **Risk**: Student is credited 400 LE, but only gave 200 LE cash. Totals are wrong.
+    *   **Technical**: Database styling/locking or optimistic concurrency control needed.
+
+#### C. Teacher Salaries (رواتب المعلمين)
+5.  **The "Unpaid Revenue Share"**
+    *   **Situation**: Teacher takes 50% of revenue. 10 students attended, but only 5 paid.
+    *   **Risk**: Does Teacher get paid for all 10 (Accrual basis) or only the 5 who paid (Cash basis)?
+    *   **Conflict**: If Accrual, Center pays out of pocket. If Cash, Teacher gets mad waiting for students.
+
+6.  **The "Mid-Cycle Contract Change"**
+    *   **Situation**: Teacher is on "Percentage" mode (40%). On the 25th of the month, Admin changes them to "Fixed Salary" (5000 EGP).
+    *   **Risk**: The system calculates the *entire* month based on the *current* setting (Fixed 5000), ignoring that they might have earned 8000 in percentage for the first 3 weeks.
+    *   **Complexity**: System needs to support "Effective Date" for contracts.
+
+7.  **The "Retroactive Attendance"**
+    *   **Situation**: Teacher forgot to record attendance for last week. Admin records it today (next month).
+    *   **Risk**: Does this attendance count towards *Last Month's* salary (already closed/paid) or *This Month*?
+    *   **Complexity**: Recalculating closed financial periods.
+
+---
+
+## 2. 📅 Attendance & Schedule (الحضور والجداول)
+
+### 🔍 System Overview
+Manages:
+1.  **Session Scheduling**: Recurrent weekly sessions vs One-off sessions.
+2.  **Room Management**: Capacity tracking, conflict detection.
+3.  **Smart Attendance**: QR Code scanning, manual entry, NFC (future).
+4.  **Offline Sync**: Taking attendance without internet.
+
+### ⚠️ Stress Scenarios & Edge Cases
+
+8.  **The "Time Traveler" Scan (QR Code Abuse)**
+    *   **Situation**: A student takes a photo of the QR code and sends it to their friend at home to scan 5 minutes later.
+    *   **Risk**: False attendance records.
+    *   **Defense**: Rotating QR codes (every 5-10 seconds) or Geofencing check. Does the current system support this?
+
+9.  **The "Room Overflow"**
+    *   **Situation**: Room capacity is 30. The 31st student tries to scan the QR code.
+    *   **Risk**: Overcrowding.
+    *   **Scenario**: Does the system *block* the scan with an error "Room Full"? Or just warn? Or accept it silently?
+
+10. **The "Double Booking" Paradox**
+    *   **Situation**: Admin accidentally assigns Teacher A to "Group X" (Room 1) and "Group Y" (Room 2) at the *exact same time slot*.
+    *   **Risk**: Schedule logic failure. Teacher cannot be in two places.
+    *   **Validation**: Does the `addSchedule` RPC check for teacher availability conflicts?
+
+11. **The "Offline Sync War"**
+    *   **Situation**:
+        *   Device A (Offline): Marks Student S1 as "Present".
+        *   Device B (Offline): Marks Student S1 as "Absent".
+        *   Both devices go online and sync.
+    *   **Risk**: Which status persists? The last one to sync? Or does it create duplicate records?
+
+---
+
+## 3. 👥 Student Management (إدارة الطلاب)
+
+### 🔍 System Overview
+Handles enrollment, group assignments, profile data, and transitions.
+
+### ⚠️ Stress Scenarios & Edge Cases
+
+12. **The "Group Hopper" (Transfer Mid-Month)**
+    *   **Situation**: Student moves from "Saturday Group" to "Tuesday Group" on the 20th.
+    *   **Risk**:
+        *   **Attendance**: Do previous Saturday attendances move with them? Or stay linked to the old group?
+        *   **Billing**: If groups have different prices, how is the difference calculated?
+
+13. **The "Grade Level Mismatch"**
+    *   **Situation**: Student profile says "2nd Secondary". Admin tries to add them to a "3rd Secondary" Physics group.
+    *   **Risk**: Data inconsistency. Content/Material access issues.
+    *   **Constraint**: Should the system strictly *forbid* this, or allow it with a "Warning"?
+
+14. **The "Orphaned Invoice" (Deleting a Group)**
+    *   **Situation**: Admin deletes "Group A" permanently. There are 50 unpaid invoices linked to this group.
+    *   **Risk**: These invoices might vanish from the Dashboard summary or crash the app when clicked (FK reference missing).
+    *   **Required Action**: Soft delete vs Hard delete logic.
+
+---
+
+## 4. 🔐 Security & Access (الأمان والصلاحيات)
+
+### ⚠️ Stress Scenarios & Edge Cases
+
+15. **The "Rogue Assistant"**
+    *   **Situation**: An assistant is fired. Their access is revoked.
+    *   **Risk**: If they are currently logged in on a device *offline*, can they still view cached student data?
+    *   **Mitigation**: Local data encryption and "Kill Switch" upon next connecting to network.
+
+16. **The "Concurrent Modification"**
+    *   **Situation**: Admin changes a student's name while the Teacher is entering a grade for that student.
+    *   **Risk**: Teacher's save overwrites Admin's name change with the old name (State management conflict).
+
+#### D. Refunds & Cancellations
+7.  **The "Session Cancelled After Payment"**
+    *   **Situation**: Student pays for 8 sessions (Per Session mode). Teacher cancels session 4.
+    *   **Risk**: Student balance. Does the system automatically credit them +1 session? Or refund cash?
+
+---
+*More modules to be added...*

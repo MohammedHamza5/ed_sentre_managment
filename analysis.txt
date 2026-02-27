@@ -1,0 +1,104 @@
+﻿Analyzing ed_sentre...                                          
+
+warning - The value of the field '_sessionKey' isn't used - lib\core\storage\secure_local_storage.dart:9:23 - unused_field
+warning - The declaration '_clearLocalStorage' isn't referenced - lib\core\supabase\auth_service.dart:421:23 - unused_element
+   info - The type of the right operand ('String') isn't a subtype or a supertype of the left operand ('AuthChangeEvent') - lib\core\sync\sync_service.dart:75:56 - unrelated_type_equality_checks
+   info - The type of the right operand ('String') isn't a subtype or a supertype of the left operand ('AuthChangeEvent') - lib\core\sync\sync_service.dart:81:34 - unrelated_type_equality_checks
+warning - The declaration '_processSyncQueue' isn't referenced - lib\core\sync\sync_service.dart:279:16 - unused_element
+warning - The left operand can't be null, so the right operand is never executed - lib\core\sync\sync_service.dart:402:41 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\core\sync\sync_service.dart:404:37 - dead_null_aware_expression
+warning - The declaration '_resolveConflicts' isn't referenced - lib\core\sync\sync_service.dart:745:16 - unused_element
+warning - The declaration '_retryWithBackoff' isn't referenced - lib\core\sync\sync_service.dart:784:16 - unused_element
+warning - The left operand can't be null, so the right operand is never executed - lib\core\sync\sync_service.dart:845:41 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\core\sync\sync_service.dart:847:37 - dead_null_aware_expression
+warning - The value of the field '_uuid' isn't used - lib\features\attendance\data\sources\attendance_remote_source.dart:8:9 - unused_field
+warning - The declaration '_showEditDialog' isn't referenced - lib\features\attendance\presentation\screens\attendance_screen.dart:189:8 - unused_element
+   info - Don't use 'BuildContext's across async gaps - lib\features\attendance\presentation\screens\qr_attendance_screen.dart:226:15 - use_build_context_synchronously
+warning - The value of the local variable 'opensAt' isn't used - lib\features\attendance\presentation\screens\qr_attendance_screen.dart:343:11 - unused_local_variable
+   info - Don't use 'BuildContext's across async gaps - lib\features\attendance\presentation\screens\take_attendance_screen.dart:142:21 - use_build_context_synchronously
+warning - The value of the local variable 'graceSessions' isn't used - lib\features\attendance\presentation\screens\take_attendance_screen.dart:524:11 - unused_local_variable
+warning - The value of the local variable 'maxDebt' isn't used - lib\features\attendance\presentation\screens\take_attendance_screen.dart:525:11 - unused_local_variable
+warning - The member 'emit' can only be used within 'package:bloc/src/bloc.dart' or a test - lib\features\auth\bloc\auth_bloc.dart:144:9 - invalid_use_of_visible_for_testing_member
+warning - The value of the local variable 'padding' isn't used - lib\features\dashboard\presentation\screens\dashboard_screen.dart:159:11 - unused_local_variable
+warning - The left operand can't be null, so the right operand is never executed - lib\features\dashboard\presentation\screens\dashboard_screen.dart:949:54 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\features\dashboard\presentation\screens\dashboard_screen.dart:950:57 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\features\dashboard\presentation\screens\dashboard_screen.dart:952:42 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\features\dashboard\presentation\screens\dashboard_screen.dart:1125:54 - dead_null_aware_expression
+warning - The value of the field '_uuid' isn't used - lib\features\groups\data\sources\groups_remote_source.dart:9:9 - unused_field
+warning - The value of the local variable 'groupEndTime' isn't used - lib\features\groups\data\sources\groups_remote_source.dart:438:13 - unused_local_variable
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\groups\presentation\group_details_screen.dart:679:39 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\groups\presentation\group_details_screen.dart:681:46 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\groups\presentation\group_details_screen.dart:690:25 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\groups\presentation\group_details_screen.dart:734:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\groups\presentation\group_details_screen.dart:742:11 - use_build_context_synchronously
+warning - The value of the field '_searchQuery' isn't used - lib\features\groups\presentation\groups_management_screen.dart:33:10 - unused_field
+warning - The value of the local variable 'isDark' isn't used - lib\features\groups\presentation\groups_management_screen.dart:585:11 - unused_local_variable
+   info - Use 'rethrow' to rethrow a caught exception - lib\features\payments\data\sources\payments_remote_source.dart:268:7 - use_rethrow_when_possible
+   info - Use 'rethrow' to rethrow a caught exception - lib\features\payments\data\sources\payments_remote_source.dart:279:7 - use_rethrow_when_possible
+warning - The value of the local variable 'isMixed' isn't used - lib\features\payments\presentation\screens\record_payment_screen.dart:269:11 - unused_local_variable
+warning - The declaration '_getCenterId' isn't referenced - lib\features\reports\data\reports_repository.dart:7:19 - unused_element
+   info - Statements in an if should be enclosed in a block - lib\features\reports\data\reports_repository.dart:94:11 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\reports\data\reports_repository.dart:96:11 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\reports\data\reports_repository.dart:98:11 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\reports\data\reports_repository.dart:204:11 - curly_braces_in_flow_control_structures
+warning - The left operand can't be null, so the right operand is never executed - lib\features\reports\data\reports_repository.dart:415:61 - dead_null_aware_expression
+   info - Don't use 'BuildContext's across async gaps - lib\features\reports\presentation\screens\reports_screen.dart:761:25 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\reports\presentation\students_report_screen.dart:87:28 - use_build_context_synchronously
+warning - The value of the field '_uuid' isn't used - lib\features\schedule\data\sources\schedule_remote_source.dart:8:9 - unused_field
+warning - The declaration '_getDurationString' isn't referenced - lib\features\schedule\presentation\screens\schedule_screen.dart:890:10 - unused_element
+   info - Don't use 'BuildContext's across async gaps - lib\features\settings\presentation\screens\course_prices_screen.dart:55:29 - use_build_context_synchronously
+warning - The value of the local variable 'isDark' isn't used - lib\features\settings\presentation\screens\course_prices_screen.dart:91:11 - unused_local_variable
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\settings\presentation\screens\course_prices_screen.dart:753:39 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\settings\presentation\screens\course_prices_screen.dart:755:46 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\settings\presentation\screens\course_prices_screen.dart:761:25 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\settings\presentation\screens\course_prices_screen.dart:891:33 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\settings\presentation\screens\course_prices_screen.dart:894:21 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\settings\presentation\screens\course_prices_screen.dart:899:19 - use_build_context_synchronously
+warning - The declaration '_buildRolesSection' isn't referenced - lib\features\settings\presentation\screens\settings_screen.dart:382:10 - unused_element
+warning - The declaration '_buildInfoRow' isn't referenced - lib\features\settings\presentation\screens\settings_screen.dart:1135:10 - unused_element
+warning - The declaration '_buildUsersSection' isn't referenced - lib\features\settings\presentation\screens\settings_screen.dart:1329:10 - unused_element
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\settings\presentation\screens\settings_screen.dart:1599:42 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\settings\presentation\screens\settings_screen.dart:1608:42 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\settings\presentation\screens\settings_screen.dart:1956:9 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\settings\presentation\screens\settings_screen.dart:2233:45 - use_build_context_synchronously
+warning - The value of the local variable 'centerProvider' isn't used - lib\features\settings\presentation\screens\subscription_settings_screen.dart:55:11 - unused_local_variable
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\settings\presentation\widgets\roles_management_widget.dart:171:44 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\settings\presentation\widgets\roles_management_widget.dart:191:9 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\settings\presentation\widgets\roles_management_widget.dart:209:7 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\settings\presentation\widgets\roles_management_widget.dart:249:46 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\settings\presentation\widgets\team_management_widget.dart:364:34 - use_build_context_synchronously
+warning - The value of the field '_keyTimestamp' isn't used - lib\features\students\data\sources\students_local_source.dart:9:23 - unused_field
+   info - Use 'rethrow' to rethrow a caught exception - lib\features\students\data\sources\students_remote_source.dart:523:7 - use_rethrow_when_possible
+warning - The value of the field '_teachers' isn't used - lib\features\students\presentation\screens\add_student_screen.dart:48:17 - unused_field
+warning - The declaration '_saveStudent' isn't referenced - lib\features\students\presentation\screens\add_student_screen.dart:145:16 - unused_element
+   info - Don't use 'BuildContext's across async gaps - lib\features\students\presentation\screens\add_student_screen.dart:225:25 - use_build_context_synchronously
+warning - The value of the local variable 'padding' isn't used - lib\features\students\presentation\screens\add_student_screen.dart:381:11 - unused_local_variable
+   info - Don't use 'BuildContext's across async gaps - lib\features\students\presentation\screens\add_student_screen.dart:1387:29 - use_build_context_synchronously
+warning - The value of the local variable 'priceSource' isn't used - lib\features\students\presentation\screens\student_account_statement_screen.dart:375:19 - unused_local_variable
+   info - Don't use 'BuildContext's across async gaps - lib\features\students\presentation\screens\student_account_statement_screen.dart:477:9 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\students\presentation\screens\student_details_screen.dart:750:7 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\students\presentation\screens\student_details_screen.dart:804:15 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\students\presentation\screens\student_details_screen.dart:810:32 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\students\presentation\screens\student_details_screen.dart:819:32 - use_build_context_synchronously
+   info - The prefix 'formUtils' isn't a lower_case_with_underscores identifier - lib\features\students\presentation\screens\students_screen.dart:11:52 - library_prefixes
+   info - Don't use 'BuildContext's across async gaps - lib\features\students\presentation\screens\students_screen.dart:294:46 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\students\presentation\screens\students_screen.dart:295:46 - use_build_context_synchronously
+warning - The value of the field '_uuid' isn't used - lib\features\subjects\data\sources\subjects_remote_source.dart:8:9 - unused_field
+warning - The value of the field '_keyTimestamp' isn't used - lib\features\teachers\data\sources\teachers_local_source.dart:9:23 - unused_field
+   info - Don't use 'BuildContext's across async gaps - lib\features\teachers\presentation\screens\add_teacher_full_screen.dart:97:23 - use_build_context_synchronously
+warning - The value of the field '_errorMessage' isn't used - lib\features\teachers\presentation\screens\teacher_salaries_screen.dart:29:11 - unused_field
+   info - Don't use 'BuildContext's across async gaps - lib\features\teachers\presentation\screens\teachers_screen.dart:166:21 - use_build_context_synchronously
+warning - The declaration '_buildBaseSalaryCard' isn't referenced - lib\features\teachers\presentation\teacher_salary_invoice_screen.dart:868:10 - unused_element
+warning - The declaration '_buildSessionsCard' isn't referenced - lib\features\teachers\presentation\teacher_salary_invoice_screen.dart:880:10 - unused_element
+warning - The declaration '_buildPercentageCard' isn't referenced - lib\features\teachers\presentation\teacher_salary_invoice_screen.dart:931:10 - unused_element
+warning - The value of the local variable 'isDraft' isn't used - lib\features\teachers\presentation\teacher_salary_invoice_screen.dart:1153:11 - unused_local_variable
+   info - Don't use 'BuildContext's across async gaps - lib\features\teachers\presentation\teacher_salary_invoice_screen.dart:1569:9 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\teachers\presentation\teacher_salary_invoice_screen.dart:1584:9 - use_build_context_synchronously
+warning - The declaration '_parseStatus' isn't referenced - lib\shared\data\mappers.dart:84:24 - unused_element
+warning - The value of the field '_isHovered' isn't used - lib\shared\widgets\cards\stat_card.dart:44:8 - unused_field
+warning - This default clause is covered by the previous cases - lib\shared\widgets\search\filter_panel.dart:214:7 - unreachable_switch_default
+warning - The value of the field '_visibleItems' isn't used - lib\shared\widgets\search\performance_optimized_list.dart:38:17 - unused_field
+warning - The value of the field '_filterButtonKey' isn't used - lib\shared\widgets\search\search_filter_bar.dart:44:19 - unused_field
+warning - This default clause is covered by the previous cases - lib\shared\widgets\sync\sync_status_indicator.dart:59:7 - unreachable_switch_default
+warning - This default clause is covered by the previous cases - lib\shared\widgets\sync\sync_status_indicator.dart:227:7 - unreachable_switch_default
+

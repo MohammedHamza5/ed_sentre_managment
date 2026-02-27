@@ -1,0 +1,433 @@
+# 📚 نظام حساب الطالب ومستحقاته - EdSentre
+
+## نظرة عامة
+
+هذا الملف يشرح كيف يتم حساب مستحقات الطالب، أسعار المواد، والمدفوعات في نظام EdSentre.
+
+---
+
+## 🏗️ البنية الأساسية (Database Schema)
+
+### الجداول الرئيسية
+
+```
+┌─────────────────────┐      ┌─────────────────────┐
+│      students       │      │       courses       │
+├─────────────────────┤      ├─────────────────────┤
+│ id (UUID)           │      │ id (UUID)           │
+│ full_name           │      │ name                │
+│ phone               │      │ fee (default: 0)    │
+│ email               │      │ fee_type (monthly)  │
+└─────────────────────┘      └─────────────────────┘
+         │                            │
+         │                            │
+         ▼                            ▼
+┌───────────────────────────────────────────────────┐
+│              student_group_enrollments             │
+├───────────────────────────────────────────────────┤
+│ id | student_id | group_id | center_id | status   │
+└───────────────────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────┐
+│                      groups                          │
+├─────────────────────────────────────────────────────┤
+│ id | course_id | teacher_id | grade_level | name    │
+└─────────────────────────────────────────────────────┘
+```
+
+### جدول التسعير الذكي
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                        course_prices                              │
+├──────────────────────────────────────────────────────────────────┤
+│ id (UUID)                                                         │
+│ center_id (UUID)                                                  │
+│ subject_name (TEXT) - اسم المادة مثل "الرياضيات"                   │
+│ teacher_id (UUID, nullable) - مدرس محدد أو NULL لكل المدرسين      │
+│ grade_level (TEXT, nullable) - مرحلة محددة أو NULL لكل المراحل    │
+│ session_price (DECIMAL) - سعر الحصة الواحدة                        │
+│ monthly_price (DECIMAL) - السعر الشهري                             │
+│ sessions_per_month (INT) - عدد الحصص المتوقعة شهرياً              │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### جدول الفواتير
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                    student_invoices                         │
+├────────────────────────────────────────────────────────────┤
+│ id (UUID)                                                   │
+│ student_id (UUID)                                           │
+│ center_id (UUID)                                            │
+│ month (INT) - رقم الشهر (1-12)                              │
+│ year (INT) - السنة                                          │
+│ due_date (DATE) - تاريخ الاستحقاق                           │
+│ total_amount (DECIMAL) - إجمالي الفاتورة                    │
+│ status (TEXT) - pending|partial|paid|overdue                │
+└────────────────────────────────────────────────────────────┘
+         │
+         ├──────────────────────────────┐
+         ▼                              ▼
+┌──────────────────────────┐   ┌──────────────────────────┐
+│     invoice_items        │   │    invoice_payments      │
+├──────────────────────────┤   ├──────────────────────────┤
+│ invoice_id               │   │ invoice_id               │
+│ course_id                │   │ amount                   │
+│ course_name              │   │ payment_method           │
+│ amount                   │   │ paid_at                  │
+│ description              │   │ notes                    │
+└──────────────────────────┘   └──────────────────────────┘
+```
+
+---
+
+## 🔍 نظام التسعير الذكي (Smart Pricing)
+
+### الفكرة
+بدلاً من تخزين سعر ثابت لكل مادة، النظام يسمح بتحديد أسعار مختلفة بناءً على:
+- **المادة** (مثل: الرياضيات)
+- **المدرس** (مثل: أستاذ أحمد vs أستاذ محمد)
+- **المرحلة الدراسية** (مثل: أولى ثانوي vs ثالثة ثانوي)
+
+### مستويات المطابقة (Match Levels)
+
+```
+المستوى 1 (الأدق): المادة + المدرس + المرحلة
+   مثال: الرياضيات مع أ.أحمد لطلاب أولى ثانوي = 300 ج
+
+المستوى 2a: المادة + المدرس فقط
+   مثال: الرياضيات مع أ.أحمد لأي مرحلة = 280 ج
+
+المستوى 2b: المادة + المرحلة فقط
+   مثال: الرياضيات لأي مدرس لطلاب أولى ثانوي = 250 ج
+
+المستوى 3: المادة فقط
+   مثال: الرياضيات لأي مدرس ولأي مرحلة = 200 ج
+
+المستوى 3.5: أي سعر للمادة (fallback)
+   مثال: أي سعر مسجل للرياضيات
+
+المستوى 4: السعر الافتراضي للسنتر
+   مثال: السعر الافتراضي = 150 ج
+```
+
+### RPC Function: `get_smart_price`
+
+```sql
+SELECT * FROM get_smart_price(
+  'center-uuid',      -- السنتر
+  'الرياضيات',        -- اسم المادة
+  'teacher-uuid',     -- معرف المدرس (أو NULL)
+  'أولى ثانوي'        -- المرحلة (أو NULL)
+);
+
+-- النتيجة:
+{
+  "price_id": "uuid",
+  "session_price": 31.25,
+  "monthly_price": 250.0,
+  "match_level": 1,
+  "match_description": "سعر محدد: الرياضيات - أولى ثانوي"
+}
+```
+
+---
+
+## 📊 جلب كشف حساب الطالب
+
+### الدالة: [getStudentAccountStatement](file:///c:/Users/KimoStore/StudioProjects/ed_sentre/lib/shared/data/supabase_repository.dart#2657-2720)
+
+**ملف:** [lib/shared/data/supabase_repository.dart](file:///c:/Users/KimoStore/StudioProjects/ed_sentre/lib/shared/data/supabase_repository.dart)
+
+**الخطوات:**
+
+1. **جلب بيانات الطالب الأساسية**
+```dart
+final studentData = await client
+    .from('students')
+    .select('*, users!students_user_id_fkey(full_name, phone)')
+    .eq('id', studentId)
+    .single();
+```
+
+2. **جلب التسجيلات (student_group_enrollments)**
+```dart
+final enrollments = await client
+    .from('student_group_enrollments')
+    .select('''
+      *,
+      groups:group_id(
+        id, name, teacher_id, grade_level,
+        courses:course_id(id, name, fee)
+      )
+    ''')
+    .eq('student_id', studentId);
+```
+
+3. **لكل تسجيل، جلب السعر الذكي**
+```dart
+for (final enrollment in enrollments) {
+  final group = enrollment['groups'];
+  final course = group['courses'];
+  final courseName = course['name'];
+  final teacherId = group['teacher_id'];
+  final gradeLevel = group['grade_level']; // يتحول من "1st Secondary" إلى "أولى ثانوي"
+  
+  // جلب السعر الذكي
+  final smartPrice = await getSmartPrice(
+    centerId: centerId,
+    subjectName: courseName,
+    teacherId: teacherId,
+    gradeLevel: _mapStageToGradeLevel(gradeLevel),
+  );
+  
+  // السعر النهائي
+  final fee = smartPrice?.monthlyPrice ?? course['fee'] ?? 0;
+}
+```
+
+4. **تجميع البيانات**
+```dart
+return {
+  'student': studentData,
+  'enrollments': enrichedEnrollments, // مع الأسعار
+  'totalMonthlyFees': totalFees,
+  'payments': payments,
+  'balance': balance,
+};
+```
+
+### النتيجة المتوقعة
+
+```json
+{
+  "student": {
+    "id": "student-uuid",
+    "full_name": "محمد أحمد",
+    "phone": "01012345678"
+  },
+  "enrollments": [
+    {
+      "group_name": "رياضيات أولى ثانوي",
+      "course_name": "الرياضيات",
+      "teacher_name": "أ. أحمد",
+      "calculated_fee": 250.0,
+      "is_smart_price": true,
+      "match_level": 1,
+      "match_description": "سعر محدد: الرياضيات - أولى ثانوي"
+    },
+    {
+      "group_name": "انجليزي أولى ثانوي",
+      "course_name": "انجليزي",
+      "teacher_name": "أ. سارة",
+      "calculated_fee": 222.0,
+      "is_smart_price": true,
+      "match_level": 2,
+      "match_description": "سعر المادة + المدرس"
+    }
+  ],
+  "totalMonthlyFees": 472.0,
+  "payments": [...],
+  "balance": {
+    "total": 944.0,
+    "paid": 500.0,
+    "remaining": 444.0
+  }
+}
+```
+
+---
+
+## 💰 نظام الفواتير الشهرية
+
+### إنشاء فاتورة: `generate_student_monthly_invoice`
+
+**RPC Function** تُنشئ فاتورة شهرية للطالب:
+
+```sql
+SELECT generate_student_monthly_invoice(
+  'student-uuid',
+  'center-uuid',
+  1,    -- الشهر (يناير)
+  2026  -- السنة
+);
+```
+
+**الخطوات داخل الـ RPC:**
+
+1. تحقق من وجود فاتورة سابقة للشهر
+2. إذا لم توجد، أنشئ فاتورة جديدة
+3. لكل مادة مسجل بها الطالب:
+   - استدعي `get_smart_price`
+   - أضف بند للفاتورة (`invoice_items`)
+4. احسب الإجمالي
+5. أرجع معرف الفاتورة
+
+### جلب ملخص الفاتورة: `get_student_invoice_summary`
+
+```sql
+SELECT * FROM get_student_invoice_summary(
+  'student-uuid',
+  'center-uuid',
+  1,
+  2026
+);
+```
+
+**النتيجة:**
+
+```json
+{
+  "invoice_id": "invoice-uuid",
+  "total_amount": 472.0,
+  "paid_amount": 200.0,
+  "remaining_amount": 272.0,
+  "status": "partial",
+  "items": [
+    {
+      "course_name": "الرياضيات",
+      "amount": 250.0,
+      "description": "اشتراك شهري - 2026/01"
+    },
+    {
+      "course_name": "انجليزي",
+      "amount": 222.0,
+      "description": "اشتراك شهري - 2026/01"
+    }
+  ],
+  "payments": [
+    {
+      "amount": 200.0,
+      "method": "cash",
+      "paid_at": "2026-01-05T10:30:00Z"
+    }
+  ]
+}
+```
+
+---
+
+## 📱 API للتطبيق الطالب
+
+### 1. جلب المواد المسجلة مع الأسعار
+
+**Endpoint Pattern:**
+```
+POST /rest/v1/rpc/get_student_courses_with_prices
+```
+
+**أو باستخدام Supabase Client:**
+```dart
+final result = await supabase.rpc('get_student_courses_with_prices', params: {
+  'p_student_id': studentId,
+});
+```
+
+### 2. جلب الرصيد الإجمالي
+
+```dart
+final balance = await supabase.rpc('get_student_balance', params: {
+  'p_student_id': studentId,
+});
+
+// النتيجة:
+{
+  "total": 944.0,
+  "paid": 500.0,
+  "remaining": 444.0
+}
+```
+
+### 3. جلب الفاتورة الشهرية
+
+```dart
+final invoice = await supabase.rpc('get_student_invoice_summary', params: {
+  'p_student_id': studentId,
+  'p_center_id': centerId,
+  'p_month': DateTime.now().month,
+  'p_year': DateTime.now().year,
+});
+```
+
+### 4. جلب سجل المدفوعات
+
+```dart
+final payments = await supabase
+    .from('payments')
+    .select('*, payment_items(*)')
+    .eq('student_id', studentId)
+    .order('created_at', ascending: false);
+```
+
+---
+
+## 🎯 ملخص للتطبيق الطالب
+
+### المعلومات المطلوب عرضها:
+
+| البيان | المصدر |
+|--------|--------|
+| المواد المسجلة | `student_group_enrollments` + `groups` + `courses` |
+| سعر كل مادة | `get_smart_price` RPC |
+| إجمالي الشهر | مجموع أسعار المواد |
+| المدفوع | `invoice_payments` أو `payments` |
+| المتبقي | الإجمالي - المدفوع |
+| حالة الفاتورة | `pending` / `partial` / `paid` / `overdue` |
+
+### مثال شاشة تطبيق الطالب:
+
+```
+┌─────────────────────────────────────────────┐
+│  💰 مستحقاتي - يناير 2026                    │
+├─────────────────────────────────────────────┤
+│                                             │
+│  📊 الرصيد                                  │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ │
+│  الإجمالي: 472 ج                            │
+│  المدفوع: -200 ج ✓                          │
+│  المتبقي: 272 ج ⚠️                          │
+│                                             │
+├─────────────────────────────────────────────┤
+│  📚 المواد                                  │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ │
+│                                             │
+│  📘 الرياضيات                               │
+│     أ. أحمد | أولى ثانوي                    │
+│     ────────────────────────── 250 ج        │
+│                                             │
+│  📗 انجليزي                                 │
+│     أ. سارة | أولى ثانوي                    │
+│     ────────────────────────── 222 ج        │
+│                                             │
+├─────────────────────────────────────────────┤
+│  📝 سجل المدفوعات                           │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ │
+│  ✓ 200 ج - نقدي - 2026/01/05              │
+│                                             │
+│           [ 💳 دفع الآن ]                   │
+└─────────────────────────────────────────────┘
+```
+
+---
+
+## 🔗 ملفات الكود المهمة
+
+| الملف | الوصف |
+|-------|-------|
+| [supabase_repository.dart](file:///c:/Users/KimoStore/StudioProjects/ed_sentre/lib/shared/data/supabase_repository.dart) | جميع دوال Supabase |
+| [getStudentAccountStatement()](file:///c:/Users/KimoStore/StudioProjects/ed_sentre/lib/shared/data/supabase_repository.dart#2657-2720) | كشف حساب الطالب |
+| [getSmartPrice()](file:///c:/Users/KimoStore/StudioProjects/ed_sentre/lib/shared/data/supabase_repository.dart#3958-4009) | جلب السعر الذكي |
+| [getOrCreateStudentInvoice()](file:///c:/Users/KimoStore/StudioProjects/ed_sentre/lib/shared/data/supabase_repository.dart#3111-3168) | إنشاء/جلب الفاتورة |
+| [smart_invoice_screen.dart](file:///c:/Users/KimoStore/StudioProjects/ed_sentre/lib/features/students/presentation/screens/smart_invoice_screen.dart) | شاشة الفاتورة الذكية |
+
+---
+
+## ⚠️ ملاحظات مهمة
+
+1. **التسعير الذكي** يعتمد على `course_prices` - تأكد من إدخال الأسعار هناك
+2. **المرحلة** في `groups.grade_level` تكون بالإنجليزية (مثل "1st Secondary") ويتم تحويلها إلى العربية
+3. **الفواتير** تُنشأ لكل شهر - لا تتكرر
+4. **RLS Policies** تحمي البيانات - الطالب يرى بياناته فقط

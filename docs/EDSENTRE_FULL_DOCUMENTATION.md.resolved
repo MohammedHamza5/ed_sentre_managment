@@ -1,0 +1,185 @@
+# EdSentre Ecosystem Documentation & Developer Guide 📘
+
+**Version:** 1.1 (Detailed Technical Cookbook)
+**Last Updated:** January 12, 2026
+**Purpose:** The ultimate reference for building EdSentre applications. This guide explains *how* to implement features by querying the EdSentre database.
+
+---
+
+## 1. System Architecture Overview 🌍
+
+**EdSentre** operates on a **Single-Database, Multi-Tenant** architecture.
+*   **Backend:** Supabase (PostgreSQL).
+*   **Multi-Tenancy:** All data is partitioned by `center_id`. Every query MUST filter by `center_id`.
+*   **Authentication:** Supabase Auth (`auth.users`).
+    *   Users have a corresponding record in `public.users` linked by [id](file:///c:/Users/KimoStore/StudioProjects/ed_sentre/lib/shared/widgets/navigation/app_sidebar.dart#139-148).
+    *   Roles (`center_admin`, `teacher`, [student](file:///c:/Users/KimoStore/StudioProjects/ed_sentre/lib/student), `parent`) determine data access via Row Level Security (RLS).
+
+---
+
+## 2. Developer Cookbook: Building the Apps 🛠️
+
+Here is exactly how to implement the core features for each app type.
+
+### 📱 A. Building the Student App
+
+#### 1. Authentication & Profile Loading
+*   **Goal:** Log in the student and get their details.
+*   **Step 1:** Login using Supabase Auth (Email/Phone).
+*   **Step 2:** Fetch User Profile:
+    ```sql
+    SELECT * FROM public.users WHERE id = auth.uid();
+    ```
+*   **Step 3:** Fetch Student ID (Crucial for all other queries):
+    ```sql
+    -- The 'student_id' is needed for enrollments, attendance, etc.
+    SELECT id, center_id, student_code, balance 
+    FROM public.students 
+    WHERE user_id = auth.uid(); 
+    ```
+*   **Tip:** Store `student.id` locally as `currentStudentId`.
+
+#### 2. "My Subjects" & Pricing (Enrolled Courses)
+*   **Goal:** Show list of enrolled subjects and their monthy fees.
+*   **Logic:** Student -> Enrolled in Group -> Group has specific Subject -> Subject has details.
+*   **Query (Dart/Supabase):**
+    ```dart
+    final response = await client
+      .from('student_enrollments')
+      .select('group:groups!inner(name, subject:subjects!inner(name, fee, fee_type))')
+      .eq('student_id', currentStudentId);
+    // Result: List of Map {group: {name: 'Group A', subject: {name: 'Math', fee: 150}}}
+    ```
+*   **Display:** List View showing Subject Name, Group Name, and Price (`fee`).
+
+#### 3. Financials (My Bills & Payments) 💳
+*   **Goal:** Show what the student owes and payment history.
+*   **Outstanding Balance:** Simply read `students.balance` (This is updated via Database Triggers).
+*   **Detailed Invoices:**
+    ```dart
+    // Fetch Unpaid Invoices
+    final unpaid = await client
+      .from('student_invoices')
+      .select('*, items:payment_items(*)')
+      .eq('student_id', currentStudentId)
+      .eq('status', 'pending'); 
+    ```
+*   **Payment History:** Query `student_payments` table.
+
+#### 4. My Schedule 📅
+*   **Goal:** Show weekly timetable.
+*   **Logic:** Fetch sessions belonging to groups the student is enrolled in.
+*   **Step 1:** Get List of Group IDs the student is in (from `student_enrollments`).
+*   **Step 2:** Query Sessions:
+    ```dart
+    final schedule = await client
+      .from('sessions')
+      .select('*')
+      .in_('group_id', myGroupIds); // Filter by student's groups
+    ```
+
+#### 5. Marking Attendance (QR Code) 📸
+*   **Feature:** Student scans a QR code on Teacher's screen to mark present.
+*   **Logic:**
+    1.  Teacher app generates QR containing a `session_token` (UUID).
+    2.  Student app scans token.
+    3.  Student app calls RPC:
+        ```sql
+        rpc('register_student_attendance', {
+           p_student_id: currentStudentId,
+           p_token: scannedToken,
+           p_lat: userLocation.lat, // Optional
+           p_lng: userLocation.lng  // Optional
+        })
+        ```
+    4.  Backend validates token expiry and location (if enabled), then inserts into `attendance`.
+
+---
+
+### 🍎 B. Building the Teacher App
+
+#### 1. "My Classes" (Dashboard)
+*   **Goal:** Show groups the teacher is responsible for.
+*   **Query:**
+    ```dart
+    final myGroups = await client
+      .from('groups')
+      .select('*, subject:subjects(*)')
+      .eq('teacher_id', currentTeacherId); // teacher_id from public.teachers table
+    ```
+
+#### 2. Taking Attendance (Digital Gradebook)
+*   **Scenario A: Live Session (QR)**
+    *   Call RPC `start_smart_attendance_session(group_id, ...)`
+    *   Display the returned `session_token` as a QR code.
+    *   Listen to `attendance` table Realtime changes to show students popping up as "Present" live!
+*   **Scenario B: Manual Checklist**
+    *   Fetch all students in group:
+        ```sql
+        SELECT student:students(*) 
+        FROM student_enrollments 
+        WHERE group_id = selectedGroupId;
+        ```
+    *   Display checkbox list.
+    *   On Save: `client.from('attendance').insert([...list of records...])`.
+
+---
+
+### 👨‍👩‍👧 C. Building the Parent App
+
+#### 1. Linking Children
+*   **Challenge:** How does a parent find their child?
+*   **Mechanism:** "Link Code".
+    *   Student app shows a unique code (e.g., `student_code`).
+    *   Parent enters this code.
+    *   System verifies phone number match OR sends OTP to student to approve.
+*   **Table:** `public.parent_student_links` (You may need to create this if not exists, or store in `student.parent_id`).
+    *   *Current Schema Check:* `students` table has `parent_phone`. Simple matching by phone number is the easiest MVP.
+    *   **Query:**
+        ```sql
+        SELECT * FROM students WHERE parent_phone = currentUserPhone;
+        ```
+
+#### 2. Monitoring Performance
+*   **Attendance Report:**
+    ```sql
+    SELECT count(*) as absents 
+    FROM attendance 
+    WHERE student_id = childId AND status = 'absent' AND date > firstOfMonth;
+    ```
+*   **Exam Results:** Query `assignment_submissions` table for grades.
+
+---
+
+## 3. Advanced Features & AI Integration 🧠
+
+### AI Weakness Detector ("The Seer")
+*   **How it works:**
+    1.  Assignments have `topic_tags` (e.g., #Algebra, #Derivatives).
+    2.  When a student gets a low score on an assignment, the system logs a "Weakness" event.
+*   **Implementation:**
+    *   Create a view or query that aggregates `assignment_submissions` grouped by `assignment.topic_tags`.
+    *   If `average_score < 60%`, flag detailed in `WeaknessCard` widget.
+
+### Smart Billing Trigger
+*   **Concept:** The system automatically calculates bills.
+*   **Trigger:** On `first day of month`, a Postgres Cron job runs `generate_monthly_invoices()`.
+*   **App Role:** The apps just READ this data. They do not calculate bills. This ensures consistency.
+
+---
+
+## 4. Database Schema Reference (Quick Look) 🗄️
+
+| Table | Key Columns | Purpose |
+| :--- | :--- | :--- |
+| `users` | [id](file:///c:/Users/KimoStore/StudioProjects/ed_sentre/lib/shared/widgets/navigation/app_sidebar.dart#139-148), `role`, `default_center_id` | Global user profile and strict role definition. |
+| `centers` | [id](file:///c:/Users/KimoStore/StudioProjects/ed_sentre/lib/shared/widgets/navigation/app_sidebar.dart#139-148), `subscription_plan` | The tenant. All app logic starts here. |
+| `students` | [id](file:///c:/Users/KimoStore/StudioProjects/ed_sentre/lib/shared/widgets/navigation/app_sidebar.dart#139-148), `user_id`, `balance`, `grade` | Educational profile. Links to User and Center. |
+| `groups` | [id](file:///c:/Users/KimoStore/StudioProjects/ed_sentre/lib/shared/widgets/navigation/app_sidebar.dart#139-148), `subject_id`, `teacher_id` | The main academic unit (Class). |
+| `attendance` | `student_id`, `group_id`, `status` | The single source of truth for presence. |
+| `student_invoices`| [id](file:///c:/Users/KimoStore/StudioProjects/ed_sentre/lib/shared/widgets/navigation/app_sidebar.dart#139-148), `amount`, `status` | Generated bills. |
+
+---
+
+**Development Tip:**
+Always check [supabase_repository.dart](file:///c:/Users/KimoStore/StudioProjects/ed_sentre/lib/shared/data/supabase_repository.dart) in the Desktop codebase (lib/shared/data) to see working examples of these queries. Copy-pasting the select strings (e.g. `'*, group:groups!inner(*)'`) saves hours of debugging!

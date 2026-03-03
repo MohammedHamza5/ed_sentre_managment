@@ -49,6 +49,8 @@ class SidebarMenuItem {
         return strings.attendance;
       case 'groups':
         return 'المجموعات'; // Fallback as we can't edit AppStrings easily without knowing where it is exactly (l10n usually implies arb files which need generation) - actually I will check localizations later, for now hardcode/fallback is safer or use existing if any.
+      case 'library':
+        return 'المكتبة';
       default:
         return titleKey;
     }
@@ -63,7 +65,7 @@ final List<SidebarMenuItem> sidebarMenuItems = [
     icon: Icons.dashboard_rounded,
     route: RouteNames.dashboard,
   ),
-  
+
   // 2. Daily Actions (High Frequency) ⚡
   const SidebarMenuItem(
     titleKey: 'attendance',
@@ -115,6 +117,11 @@ final List<SidebarMenuItem> sidebarMenuItems = [
     titleKey: 'rooms',
     icon: Icons.meeting_room_rounded,
     route: RouteNames.rooms,
+  ),
+  const SidebarMenuItem(
+    titleKey: 'library',
+    icon: Icons.auto_stories_rounded,
+    route: RouteNames.library,
   ),
 
   // 6. Tools 🛠️
@@ -178,7 +185,7 @@ class _AppSidebarState extends State<AppSidebar> {
         builder: (context, constraints) {
           // Use a threshold to switch between layouts to prevents overflow during animation
           final isEffectiveCollapsed = constraints.maxWidth < 150.w;
-          
+
           return Column(
             children: [
               // Premium Header/Logo
@@ -188,7 +195,9 @@ class _AppSidebarState extends State<AppSidebar> {
               Container(
                 height: 1,
                 margin: EdgeInsets.symmetric(
-                  horizontal: isEffectiveCollapsed ? AppSpacing.sm.w : AppSpacing.lg.w,
+                  horizontal: isEffectiveCollapsed
+                      ? AppSpacing.sm.w
+                      : AppSpacing.lg.w,
                 ),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -206,7 +215,9 @@ class _AppSidebarState extends State<AppSidebar> {
                 child: ListView(
                   padding: EdgeInsets.symmetric(
                     vertical: AppSpacing.md.h,
-                    horizontal: isEffectiveCollapsed ? AppSpacing.sm.w : AppSpacing.md.w,
+                    horizontal: isEffectiveCollapsed
+                        ? AppSpacing.sm.w
+                        : AppSpacing.md.w,
                   ),
                   children: sidebarMenuItems
                       .map(
@@ -214,7 +225,8 @@ class _AppSidebarState extends State<AppSidebar> {
                           item: item,
                           strings: strings,
                           isCollapsed: isEffectiveCollapsed,
-                          isActive: currentRoute == item.route ||
+                          isActive:
+                              currentRoute == item.route ||
                               currentRoute.startsWith('${item.route}/'),
                           onTap: () => context.go(item.route),
                         ),
@@ -270,67 +282,67 @@ class _AppSidebarState extends State<AppSidebar> {
                 ),
               ),
             )
-      // Expanded: Full header
+          // Expanded: Full header
           : Row(
-        children: [
-          // Logo with white background
-          Container(
-            width: 44.w,
-            height: 44.w,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.school_rounded,
-              color: Color(0xFF3B82F6),
-              size: 24,
-            ),
-          ),
-
-          SizedBox(width: AppSpacing.md.w),
-
-          // Logo Text
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'EdSentre',
-                  style: TextStyle(
-                    fontSize: 18.sp, // Reduced
-                    fontWeight: FontWeight.w800,
+                // Logo with white background
+                Container(
+                  width: 44.w,
+                  height: 44.w,
+                  decoration: BoxDecoration(
                     color: Colors.white,
-                    letterSpacing: -0.5,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.15),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  strings.isArabic ? 'إدارة السنتر' : 'Center Management',
-                  style: TextStyle(
-                    fontSize: 10.sp, // Reduced
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white.withValues(alpha: 0.7),
+                  child: const Icon(
+                    Icons.school_rounded,
+                    color: Color(0xFF3B82F6),
+                    size: 24,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
+
+                SizedBox(width: AppSpacing.md.w),
+
+                // Logo Text
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'EdSentre',
+                        style: TextStyle(
+                          fontSize: 18.sp, // Reduced
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          letterSpacing: -0.5,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 2.h),
+                      Text(
+                        strings.isArabic ? 'إدارة السنتر' : 'Center Management',
+                        style: TextStyle(
+                          fontSize: 10.sp, // Reduced
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white.withValues(alpha: 0.7),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Collapse Button
+                if (widget.onToggle != null) _buildToggleButton(),
               ],
             ),
-          ),
-
-          // Collapse Button
-          if (widget.onToggle != null) _buildToggleButton(),
-        ],
-      ),
     );
   }
 
@@ -361,13 +373,11 @@ class _AppSidebarState extends State<AppSidebar> {
 
   Widget _buildFooter(bool isDark, AppStrings strings, bool isCollapsed) {
     return Container(
-      padding: EdgeInsets.all(
-        isCollapsed ? AppSpacing.sm.w : AppSpacing.md.w,
-      ),
+      padding: EdgeInsets.all(isCollapsed ? AppSpacing.sm.w : AppSpacing.md.w),
       margin: EdgeInsets.only(bottom: AppSpacing.sm.h),
       child: Tooltip(
         message: strings.isArabic ? 'هل تحتاج مساعدة؟' : 'Need Help?',
-         child: InkWell(
+        child: InkWell(
           onTap: () => context.go(RouteNames.support),
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           child: isCollapsed
@@ -391,7 +401,9 @@ class _AppSidebarState extends State<AppSidebar> {
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -400,7 +412,9 @@ class _AppSidebarState extends State<AppSidebar> {
                         height: 32.w, // Reduced
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusSm,
+                          ),
                         ),
                         child: const Icon(
                           Icons.headset_mic_rounded,
@@ -414,7 +428,9 @@ class _AppSidebarState extends State<AppSidebar> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              strings.isArabic ? 'هل تحتاج مساعدة؟' : 'Need Help?',
+                              strings.isArabic
+                                  ? 'هل تحتاج مساعدة؟'
+                                  : 'Need Help?',
                               style: TextStyle(
                                 fontSize: 11.sp, // Reduced
                                 fontWeight: FontWeight.w600,
@@ -423,7 +439,9 @@ class _AppSidebarState extends State<AppSidebar> {
                             ),
                             SizedBox(height: 2.h),
                             Text(
-                              strings.isArabic ? 'تواصل معنا' : 'Contact Support',
+                              strings.isArabic
+                                  ? 'تواصل معنا'
+                                  : 'Contact Support',
                               style: TextStyle(
                                 fontSize: 9.sp, // Reduced
                                 color: Colors.white.withValues(alpha: 0.7),
@@ -522,54 +540,54 @@ class _SidebarItemState extends State<_SidebarItem>
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 boxShadow: widget.isActive
                     ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
                     : null,
               ),
               child: widget.isCollapsed
-              // Collapsed: Only icon, centered
-                  ? Center(
-                child: _buildIcon(),
-              )
-              // Expanded: Icon + Text + Arrow
+                  // Collapsed: Only icon, centered
+                  ? Center(child: _buildIcon())
+                  // Expanded: Icon + Text + Arrow
                   : Row(
-                children: [
-                  _buildIcon(),
-                  SizedBox(width: AppSpacing.sm.w + 4), // Adjusted spacing
-                  Expanded(
-                    child: Text(
-                      widget.item.getTitle(widget.strings),
-                      style: TextStyle(
-                        color: widget.isActive
-                            ? AppColors.primary
-                            : _isHovered
-                            ? Colors.white
-                            : Colors.white.withValues(alpha: 0.9),
-                        fontWeight: widget.isActive
-                            ? FontWeight.w600
-                            : FontWeight.w500,
-                        fontSize: 13.sp, // Reduced
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
+                      children: [
+                        _buildIcon(),
+                        SizedBox(
+                          width: AppSpacing.sm.w + 4,
+                        ), // Adjusted spacing
+                        Expanded(
+                          child: Text(
+                            widget.item.getTitle(widget.strings),
+                            style: TextStyle(
+                              color: widget.isActive
+                                  ? AppColors.primary
+                                  : _isHovered
+                                  ? Colors.white
+                                  : Colors.white.withValues(alpha: 0.9),
+                              fontWeight: widget.isActive
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                              fontSize: 13.sp, // Reduced
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                        // Active indicator arrow
+                        if (widget.isActive)
+                          Padding(
+                            padding: EdgeInsets.only(left: AppSpacing.sm.w),
+                            child: const Icon(
+                              Icons.chevron_left_rounded,
+                              size: 14, // Reduced
+                              color: AppColors.primary,
+                            ),
+                          ),
+                      ],
                     ),
-                  ),
-                  // Active indicator arrow
-                  if (widget.isActive)
-                    Padding(
-                      padding: EdgeInsets.only(left: AppSpacing.sm.w),
-                      child: const Icon(
-                        Icons.chevron_left_rounded,
-                        size: 14, // Reduced
-                        color: AppColors.primary,
-                      ),
-                    ),
-                ],
-              ),
             ),
           ),
         ),
@@ -598,16 +616,18 @@ class _SidebarItemState extends State<_SidebarItem>
             color: widget.isActive
                 ? Colors.white
                 : _isHovered
-                    ? Colors.white
-                    : Colors.white.withValues(alpha: 0.8),
+                ? Colors.white
+                : Colors.white.withValues(alpha: 0.8),
           ),
         ),
-        
+
         // Badge (Connected to Real Unread Count from CenterProvider)
         if (hasBadge)
-          Consumer<CenterProvider>( // Import provider
+          Consumer<CenterProvider>(
+            // Import provider
             builder: (context, provider, child) {
-              if (provider.unreadNotificationsCount == 0) return const SizedBox();
+              if (provider.unreadNotificationsCount == 0)
+                return const SizedBox();
               return Positioned(
                 top: -2.h,
                 right: -2.w,
@@ -621,17 +641,21 @@ class _SidebarItemState extends State<_SidebarItem>
                   ),
                   child: Center(
                     child: Text(
-                      provider.unreadNotificationsCount > 9 ? '9+' : '${provider.unreadNotificationsCount}',
-                      style: TextStyle(fontSize: 8.sp, color: Colors.white, fontWeight: FontWeight.bold),
+                      provider.unreadNotificationsCount > 9
+                          ? '9+'
+                          : '${provider.unreadNotificationsCount}',
+                      style: TextStyle(
+                        fontSize: 8.sp,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
               );
-            }
+            },
           ),
       ],
     );
   }
 }
-
-

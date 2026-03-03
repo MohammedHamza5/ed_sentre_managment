@@ -13,6 +13,7 @@ import '../offline/offline_banner.dart';
 import '../../../features/auth/bloc/auth_bloc.dart';
 import 'package:ed_sentre/core/supabase/supabase_client.dart';
 import '../../../core/providers/center_provider.dart';
+import '../../../features/auth/presentation/screens/center_status_screens.dart';
 
 /// الهيكل الرئيسي للتطبيق
 /// يحتوي على القائمة الجانبية والمحتوى
@@ -78,6 +79,18 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
+    final centerProvider = context.watch<CenterProvider>();
+
+    // ─── Lifecycle Interceptor ─────────────────────────
+    if (centerProvider.isInitialized) {
+      final status = centerProvider.approvalStatus;
+      if (status == 'pending') return const PendingApprovalScreen();
+      if (status == 'rejected') return const RejectedCenterScreen();
+      if (status == 'frozen') return const FrozenCenterScreen();
+      if (status == 'terminated') return const TerminatedCenterScreen();
+    }
+    // ───────────────────────────────────────────────────
+
     final deviceType = ResponsiveUtils.getDeviceType(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -104,9 +117,7 @@ class _AppShellState extends State<AppShell> {
             AppSidebar(
               isCollapsed:
                   deviceType == DeviceType.tablet || _isSidebarCollapsed,
-              onToggle: deviceType == DeviceType.tablet
-                  ? null
-                  : _toggleSidebar,
+              onToggle: deviceType == DeviceType.tablet ? null : _toggleSidebar,
             ),
 
           // المحتوى الرئيسي مع مؤشر الاتصال
@@ -186,7 +197,9 @@ class _AppShellState extends State<AppShell> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           gradient: AppColors.primaryGradient,
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusLg,
+                          ),
                           boxShadow: [
                             BoxShadow(
                               color: AppColors.primary.withValues(alpha: 0.3),
@@ -220,13 +233,15 @@ class _AppShellState extends State<AppShell> {
                           Consumer<CenterProvider>(
                             builder: (context, centerProvider, _) {
                               return Text(
-                                centerProvider.centerName.isNotEmpty 
-                                    ? centerProvider.centerName 
+                                centerProvider.centerName.isNotEmpty
+                                    ? centerProvider.centerName
                                     : 'EdSentre',
                                 style: TextStyle(
                                   fontSize: 18.sp,
                                   fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white : AppColors.primary,
+                                  color: isDark
+                                      ? Colors.white
+                                      : AppColors.primary,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               );
@@ -239,7 +254,7 @@ class _AppShellState extends State<AppShell> {
 
                 const Spacer(),
 
-                 // Icons
+                // Icons
                 Row(
                   children: [
                     _buildPremiumIconButton(
@@ -318,7 +333,9 @@ class _AppShellState extends State<AppShell> {
               Icon(
                 icon,
                 size: 22.sp,
-                color: isDark ? Colors.white : AppColors.primary.withValues(alpha: 0.8),
+                color: isDark
+                    ? Colors.white
+                    : AppColors.primary.withValues(alpha: 0.8),
               ),
               if (badgeCount > 0)
                 Positioned(
@@ -410,10 +427,7 @@ class _AppShellState extends State<AppShell> {
                     offset: const Offset(0, 2),
                   ),
                 ],
-                border: Border.all(
-                  color: Colors.white,
-                  width: 2,
-                ),
+                border: Border.all(color: Colors.white, width: 2),
               ),
               child: Center(
                 child: Text(
@@ -441,7 +455,9 @@ class _AppShellState extends State<AppShell> {
                     ),
                   ),
                   Text(
-                    role == 'center_admin' ? 'مدير السنتر' : role, // Quick localization fix
+                    role == 'center_admin'
+                        ? 'مدير السنتر'
+                        : role, // Quick localization fix
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w500,
@@ -485,7 +501,9 @@ class _AppShellState extends State<AppShell> {
           decoration: BoxDecoration(
             color: isDestructive
                 ? AppColors.error.withValues(alpha: 0.1)
-                : (isDark ? Colors.white.withValues(alpha: 0.1) : AppColors.gray100),
+                : (isDark
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : AppColors.gray100),
             borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           ),
           child: Icon(icon, size: 18.sp, color: color),
@@ -493,11 +511,13 @@ class _AppShellState extends State<AppShell> {
         SizedBox(width: AppSpacing.md.w),
         Text(
           title,
-          style: TextStyle(color: color, fontWeight: FontWeight.w500, fontSize: 13.sp), // added optional size
+          style: TextStyle(
+            color: color,
+            fontWeight: FontWeight.w500,
+            fontSize: 13.sp,
+          ), // added optional size
         ),
       ],
     );
   }
 }
-
-

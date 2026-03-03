@@ -733,7 +733,7 @@ class _StudentRowState extends State<_StudentRow> {
         showDialog(
           context: context,
           builder: (ctx) =>
-              _buildInvitationCodesDialog(studentCode, parentCode),
+              _buildInvitationCodesDialog(ctx, studentCode, parentCode),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -754,7 +754,11 @@ class _StudentRowState extends State<_StudentRow> {
     }
   }
 
-  Widget _buildInvitationCodesDialog(String? studentCode, String? parentCode) {
+  Widget _buildInvitationCodesDialog(
+    BuildContext dialogContext,
+    String? studentCode,
+    String? parentCode,
+  ) {
     return AlertDialog(
       title: Text('أكواد الدعوة'),
       content: Column(
@@ -789,7 +793,7 @@ class _StudentRowState extends State<_StudentRow> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pop(dialogContext),
           child: Text('إغلاق'),
         ),
       ],
@@ -1128,5 +1132,3 @@ class _StudentRowState extends State<_StudentRow> {
     );
   }
 }
-
-

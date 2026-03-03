@@ -38,6 +38,15 @@ class CenterProvider extends ChangeNotifier {
   int get courseCount => _centerData?['course_count'] ?? 0;
   int get groupCount => _centerData?['group_count'] ?? 0;
 
+  // Lifecycle & Status Getters
+  String get approvalStatus =>
+      _centerData?['approval_status'] ??
+      (_centerData?['is_active'] == true ? 'approved' : 'rejected');
+  String get freezeReason => _centerData?['freeze_reason'] ?? '';
+  String get rejectionReason => _centerData?['rejection_reason'] ?? '';
+  String get terminationDeletionDate =>
+      _centerData?['termination_data_deletion_date'] ?? '';
+
   /// تحديث العدادات فقط (أسرع من reload كامل)
   Future<void> refreshCounts() async {
     if (_centerId == null) return;

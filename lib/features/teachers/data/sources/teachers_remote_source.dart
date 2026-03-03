@@ -44,7 +44,9 @@ class TeachersRemoteSource {
               )
             )
           ''')
-          .eq('center_id', centerId);
+          .eq('center_id', centerId)
+          .filter('deleted_at', 'is', null)
+          .neq('employment_status', 'terminated');
 
       debugPrint('📥 [getTeachers] Data Loaded: ${(response as List).length}');
 
@@ -425,19 +427,17 @@ class TeachersRemoteSource {
   }
 
   Future<void> deleteTeacher(String id, {bool softDelete = true}) async {
-    // Soft delete logic usually involves setting a deleted_at flag or status
-    // For now, implementing as per previous repository if it was doing hard delete or status update
-    // Previous implementation called deleteTeacher in SupabaseRepo.
-    // Assuming hard delete or status update based on requirements.
-    // "deleteTeacher" in SupabaseRepo isn't shown fully in snippets,
-    // but typically we might just set status to inactive or deleted_at.
-
-    // For safety, let's just deactivate in enrollment
     final centerId = await _getCenterId();
     if (centerId != null) {
+      final now = DateTime.now().toIso8601String();
       await SupabaseClientManager.client
           .from('teacher_enrollments')
-          .update({'employment_status': 'terminated'})
+          .update({
+            'employment_status': 'terminated',
+            'status': 'inactive',
+            'deleted_at': now,
+            'updated_at': now,
+          })
           .eq('teacher_id', id)
           .eq('center_id', centerId);
     }

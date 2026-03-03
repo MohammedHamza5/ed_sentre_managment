@@ -35,65 +35,74 @@ class _TakeAttendanceContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final strings = AppStrings.of(context);
-    final state = context.watch<AttendanceBloc>().state;
+    // ✅ BlocConsumer يفصل بين:
+    //    - listener: للـ side effects (SnackBar، Navigation) — يُشغَّل مرة واحدة
+    //    - builder:  لبناء الـ UI — يُعاد بناؤه عند كل تغيير في الـ state
+    return BlocConsumer<AttendanceBloc, AttendanceState>(
+      // listenWhen يضمن تشغيل الـ listener فقط عند تغيير الـ step أو errorMessage
+      listenWhen: (previous, current) =>
+          previous.step != current.step ||
+          previous.errorMessage != current.errorMessage,
+      listener: (context, state) {
+        final strings = AppStrings.of(context);
 
-    // Handle Side Effects (Success/Error)
-    if (state.step == AttendanceStep.success) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(strings.attendanceSaved),
-            backgroundColor: AppColors.success,
+        if (state.step == AttendanceStep.success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(strings.attendanceSaved),
+              backgroundColor: AppColors.success,
+            ),
+          );
+          context.go('/attendance');
+        }
+
+        if (state.errorMessage != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.errorMessage!),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final strings = AppStrings.of(context);
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(strings.takeAttendance),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: () {
+                  context.read<AttendanceBloc>().add(
+                    SetAttendanceContext(date: state.selectedDate),
+                  );
+                },
+              ),
+            ],
+          ),
+          body: Column(
+            children: [
+              // 1. Context Section (Date & Session)
+              _buildContextCard(context, state, strings, isDark),
+
+              // 2. Stats Summary (Only if marking)
+              if (state.step == AttendanceStep.marking)
+                _buildStatsBar(context, state, isDark),
+
+              // 3. Main Content (Session Selector OR Student List)
+              Expanded(
+                  child: _buildMainContent(context, state, strings, isDark)),
+
+              // 4. Floating Action / Bottom Bar for Submit
+              if (state.step == AttendanceStep.marking)
+                _buildBottomBar(context, state, strings),
+            ],
           ),
         );
-        context.go('/attendance');
-      });
-    }
-
-    if (state.errorMessage != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(state.errorMessage!),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      });
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(strings.takeAttendance),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              context.read<AttendanceBloc>().add(
-                SetAttendanceContext(date: state.selectedDate),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // 1. Context Section (Date & Session)
-          _buildContextCard(context, state, strings, isDark),
-
-          // 2. Stats Summary (Only if marking)
-          if (state.step == AttendanceStep.marking)
-            _buildStatsBar(context, state, isDark),
-
-          // 3. Main Content (Session Selector OR Student List)
-          Expanded(child: _buildMainContent(context, state, strings, isDark)),
-
-          // 4. Floating Action / Bottom Bar for Submit
-          if (state.step == AttendanceStep.marking)
-            _buildBottomBar(context, state, strings),
-        ],
-      ),
+      },
     );
   }
 
@@ -591,5 +600,3 @@ class _StatusChip extends StatelessWidget {
     );
   }
 }
-
-

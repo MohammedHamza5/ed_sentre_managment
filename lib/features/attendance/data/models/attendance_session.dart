@@ -1,11 +1,14 @@
 import 'package:equatable/equatable.dart';
 
-enum SessionStatus { scheduled, open, locked, closed }
+/// حالة جلسة QR للحضور — مختلفة عن SessionStatus في schedule_models.dart
+/// { scheduled, ongoing, completed, cancelled } تلك للجدول الدراسي
+/// هذه مخصصة لجلسات QR Code فقط
+enum QrSessionStatus { scheduled, open, locked, closed }
 
 class AttendanceSession extends Equatable {
   final String id;
   final String groupId;
-  final SessionStatus status;
+  final QrSessionStatus status;
   final DateTime opensAt;
   final DateTime? closesAt;
   final DateTime? onTimeUntil;
@@ -27,9 +30,9 @@ class AttendanceSession extends Equatable {
     return AttendanceSession(
       id: json['id'] as String,
       groupId: json['group_id'] as String,
-      status: SessionStatus.values.firstWhere(
+      status: QrSessionStatus.values.firstWhere(
         (e) => e.name == (json['status'] ?? 'scheduled'),
-        orElse: () => SessionStatus.scheduled,
+        orElse: () => QrSessionStatus.scheduled,
       ),
       opensAt: DateTime.parse(json['opens_at'] as String),
       closesAt: json['closes_at'] != null
@@ -56,15 +59,24 @@ class AttendanceSession extends Equatable {
     };
   }
 
+  /// هل الجلسة مفتوحة حالياً لتسجيل الحضور؟
+  bool get isOpen => status == QrSessionStatus.open;
+
+  /// هل الجلسة مقفلة (لا يمكن تسجيل حضور جديد)؟
+  bool get isLocked => status == QrSessionStatus.locked;
+
+  /// هل الجلسة مغلقة نهائياً؟
+  bool get isClosed => status == QrSessionStatus.closed;
+
   @override
   List<Object?> get props => [
-    id,
-    groupId,
-    status,
-    opensAt,
-    closesAt,
-    onTimeUntil,
-    qrCodeRotationKey,
-    createdAt,
-  ];
+        id,
+        groupId,
+        status,
+        opensAt,
+        closesAt,
+        onTimeUntil,
+        qrCodeRotationKey,
+        createdAt,
+      ];
 }

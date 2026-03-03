@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -37,6 +38,7 @@ import '../../features/support/presentation/screens/ticket_chat_screen.dart';
 import '../../features/reports/presentation/screens/smart_financial_dashboard_screen.dart';
 import '../../features/students/presentation/screens/smart_invoice_screen.dart';
 import '../../features/settings/presentation/screens/course_prices_screen.dart';
+import '../../features/library/presentation/center_library_screen.dart';
 
 import '../../shared/models/models.dart';
 
@@ -54,7 +56,7 @@ class AppRouter {
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: RouteNames.login,
-    debugLogDiagnostics: true,
+    debugLogDiagnostics: kDebugMode,
     refreshListenable: _authRefreshNotifier,
     redirect: (context, state) {
       // تطبيع المسارات: قص الشرطة المائلة الأخيرة لأي مسار (عدا "/")
@@ -265,8 +267,9 @@ class AppRouter {
               GoRoute(
                 path: 'analytics',
                 name: 'analytics',
-                pageBuilder: (context, state) =>
-                    const NoTransitionPage(child: SmartFinancialDashboardScreen()),
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: SmartFinancialDashboardScreen(),
+                ),
               ),
             ],
           ),
@@ -343,6 +346,14 @@ class AppRouter {
                 ),
               ),
             ],
+          ),
+
+          // Library - المكتبة
+          GoRoute(
+            path: RouteNames.library,
+            name: 'library',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: CenterLibraryScreen()),
           ),
 
           // Search - البحث

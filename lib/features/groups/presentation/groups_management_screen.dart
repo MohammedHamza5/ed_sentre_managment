@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../../../core/providers/center_provider.dart';
 import '../../../shared/models/models.dart';
 import '../data/repositories/groups_repository.dart';
+import '../../../core/constants/educational_consts.dart';
 import '../../subjects/data/repositories/subjects_repository.dart';
 import 'add_edit_group_dialog.dart';
 import 'group_details_screen.dart';
@@ -437,50 +438,24 @@ class _GroupsManagementScreenState extends State<GroupsManagementScreen>
                           SizedBox(width: 8.w),
 
                           // Grades
-                          _buildFilterChip(
-                            label: '1️⃣ أولى ثانوي',
-                            isSelected: _selectedGrade == 'الصف الأول الثانوي',
-                            color: Colors.blue,
-                            onTap: () {
-                              setState(
-                                () => _selectedGrade =
-                                    _selectedGrade == 'الصف الأول الثانوي'
-                                    ? null
-                                    : 'الصف الأول الثانوي',
-                              );
-                              _loadGroups();
-                            },
-                          ),
-                          SizedBox(width: 8.w),
-                          _buildFilterChip(
-                            label: '2️⃣ ثانية ثانوي',
-                            isSelected: _selectedGrade == 'الصف الثاني الثانوي',
-                            color: Colors.purple,
-                            onTap: () {
-                              setState(
-                                () => _selectedGrade =
-                                    _selectedGrade == 'الصف الثاني الثانوي'
-                                    ? null
-                                    : 'الصف الثاني الثانوي',
-                              );
-                              _loadGroups();
-                            },
-                          ),
-                          SizedBox(width: 8.w),
-                          _buildFilterChip(
-                            label: '3️⃣ ثالثة ثانوي',
-                            isSelected: _selectedGrade == 'الصف الثالث الثانوي',
-                            color: Colors.teal,
-                            onTap: () {
-                              setState(
-                                () => _selectedGrade =
-                                    _selectedGrade == 'الصف الثالث الثانوي'
-                                    ? null
-                                    : 'الصف الثالث الثانوي',
-                              );
-                              _loadGroups();
-                            },
-                          ),
+                          ...EducationalStages.allGrades.map((grade) {
+                            return Padding(
+                              padding: EdgeInsets.only(right: 8.w),
+                              child: _buildFilterChip(
+                                label:
+                                    '🎓 ${EducationalStages.getShortName(grade)}',
+                                isSelected: _selectedGrade == grade,
+                                color: Colors.blue,
+                                onTap: () {
+                                  setState(
+                                    () => _selectedGrade =
+                                        _selectedGrade == grade ? null : grade,
+                                  );
+                                  _loadGroups();
+                                },
+                              ),
+                            );
+                          }),
                         ],
                       ),
                     ),
@@ -1152,10 +1127,7 @@ class _GroupsManagementScreenState extends State<GroupsManagementScreen>
   }
 
   String _shortenGrade(String grade) {
-    if (grade.contains('الأول')) return '1 ثانوي';
-    if (grade.contains('الثاني')) return '2 ثانوي';
-    if (grade.contains('الثالث')) return '3 ثانوي';
-    return grade;
+    return EducationalStages.getShortName(grade);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════

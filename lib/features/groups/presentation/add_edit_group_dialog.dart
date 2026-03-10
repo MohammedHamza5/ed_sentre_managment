@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import '../../../shared/models/models.dart';
 import '../../schedule/data/repositories/schedule_repository.dart';
+import '../../../core/constants/educational_consts.dart';
 import '../data/repositories/groups_repository.dart';
 import '../../subjects/data/repositories/subjects_repository.dart';
 import '../../teachers/data/repositories/teachers_repository.dart';
@@ -331,11 +332,9 @@ class _AddEditGroupDialogState extends State<AddEditGroupDialog> {
             DropdownButtonFormField<String>(
               value: _selectedGrade,
               decoration: _inputDecoration('المرحلة الدراسية', Icons.school),
-              items: [
-                'الصف الأول الثانوي',
-                'الصف الثاني الثانوي',
-                'الصف الثالث الثانوي',
-              ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+              items: EducationalStages.allGrades
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .toList(),
               onChanged: (v) {
                 setState(() => _selectedGrade = v);
                 _autoSuggestGroupName();
@@ -566,12 +565,9 @@ class _AddEditGroupDialogState extends State<AddEditGroupDialog> {
       if (c.isNotEmpty) parts.add(c['name']);
     }
     if (_selectedGrade != null) {
-      final gradeMap = {
-        'الصف الأول الثانوي': '1ث',
-        'الصف الثاني الثانوي': '2ث',
-        'الصف الثالث الثانوي': '3ث',
-      };
-      parts.add(gradeMap[_selectedGrade] ?? _selectedGrade!);
+      parts.add(
+        EducationalStages.getShortName(_selectedGrade!) ?? _selectedGrade!,
+      );
     }
     // Don't add day here as it's multi-session now, maybe add "Group A" or similar?
     // Actually, users typically name it "Saturday Group" if primary, or just "Group 1".

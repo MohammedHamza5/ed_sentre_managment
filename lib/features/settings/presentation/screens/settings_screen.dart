@@ -23,6 +23,7 @@ import '../widgets/access_card_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../shared/models/billing_models.dart';
 import '../../../../core/offline/local_cache_service.dart';
+import '../../../../core/constants/educational_consts.dart';
 
 /// شاشة الإعدادات
 class SettingsScreen extends StatefulWidget {
@@ -905,9 +906,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ],
                   ),
-                  _buildExampleRow('رياضيات', 'أ/ محمد', 'ثالثة ثانوي', '70 ج'),
-                  _buildExampleRow('رياضيات', 'أ/ محمد', 'ثانية ثانوي', '60 ج'),
-                  _buildExampleRow('رياضيات', 'أ/ أحمد', 'ثالثة ثانوي', '80 ج'),
+                  _buildExampleRow(
+                    'رياضيات',
+                    'أ/ محمد',
+                    EducationalStages.secThird,
+                    '70 ج',
+                  ),
+                  _buildExampleRow(
+                    'رياضيات',
+                    'أ/ محمد',
+                    EducationalStages.secSecond,
+                    '60 ج',
+                  ),
+                  _buildExampleRow(
+                    'رياضيات',
+                    'أ/ أحمد',
+                    EducationalStages.secThird,
+                    '80 ج',
+                  ),
                 ],
               ),
             ],

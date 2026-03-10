@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/providers/center_provider.dart';
+import '../../../../core/constants/educational_consts.dart';
 import '../../../../shared/models/models.dart';
 import '../widgets/smart_payment_item_card.dart';
 import '../../data/repositories/payment_repository.dart';
@@ -458,7 +459,9 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outline.withValues(alpha: 0.3),
                 ),
               ),
               child: ListTile(
@@ -727,20 +730,7 @@ class _SmartStudentPickerDialogState extends State<_SmartStudentPickerDialog> {
   String? _error;
 
   // Stage options for filter
-  final List<String> _stages = [
-    'الصف الأول الابتدائي',
-    'الصف الثاني الابتدائي',
-    'الصف الثالث الابتدائي',
-    'الصف الرابع الابتدائي',
-    'الصف الخامس الابتدائي',
-    'الصف السادس الابتدائي',
-    'الصف الأول الإعدادي',
-    'الصف الثاني الإعدادي',
-    'الصف الثالث الإعدادي',
-    'الصف الأول الثانوي',
-    'الصف الثاني الثانوي',
-    'الصف الثالث الثانوي',
-  ];
+  final List<String> _stages = EducationalStages.allGrades;
 
   @override
   void initState() {
@@ -1118,5 +1108,3 @@ class _StudentListTile extends StatelessWidget {
     );
   }
 }
-
-

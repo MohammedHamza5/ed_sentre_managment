@@ -1,5 +1,7 @@
 /// Form Validation Utilities
 /// أدوات التحقق من صحة البيانات
+import '../constants/educational_consts.dart';
+
 class FormValidators {
   FormValidators._();
 
@@ -120,10 +122,12 @@ class FormUtils {
 
   /// تنسيق المبلغ الكامل
   static String formatFullCurrency(double amount) {
-    final formatted = amount.toStringAsFixed(0).replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]},',
-    );
+    final formatted = amount
+        .toStringAsFixed(0)
+        .replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]},',
+        );
     return '$formatted ج';
   }
 
@@ -156,16 +160,27 @@ class FormUtils {
   }
 
   /// المراحل الدراسية
-  static List<String> get stages => ['ثانوي 1', 'ثانوي 2', 'ثانوي 3'];
+  static List<String> get stages => EducationalStages.allGrades;
 
   /// صلات القرابة
-  static List<String> get relations => ['والد', 'والدة', 'أخ', 'أخت', 'عم', 'خال', 'أخرى'];
+  static List<String> get relations => [
+    'والد',
+    'والدة',
+    'أخ',
+    'أخت',
+    'عم',
+    'خال',
+    'أخرى',
+  ];
 
   /// طرق الدفع
-  static List<String> get paymentMethods => ['نقدي', 'فودافون كاش', 'تحويل بنكي', 'انستاباي'];
+  static List<String> get paymentMethods => [
+    'نقدي',
+    'فودافون كاش',
+    'تحويل بنكي',
+    'انستاباي',
+  ];
 
   /// أنواع الاشتراك
   static List<String> get subscriptionTypes => ['شهري', 'فصلي', 'سنوي'];
 }
-
-

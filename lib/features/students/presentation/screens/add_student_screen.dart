@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/educational_consts.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/utils/form_validators.dart';
 import '../../../../shared/models/models.dart';
@@ -1763,11 +1764,7 @@ class _AddStudentScreenState extends State<AddStudentScreen>
 
 /// Form Utils Helper
 class FormUtils {
-  static const stages = [
-    'الصف الأول الثانوي',
-    'الصف الثاني الثانوي',
-    'الصف الثالث الثانوي',
-  ];
+  static const stages = EducationalStages.allGrades;
 
   static const relations = ['الأب', 'الأم', 'الأخ/الأخت', 'آخر'];
 }

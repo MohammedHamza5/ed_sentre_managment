@@ -2,9 +2,11 @@
 /// دوال مساعدة للتعامل مع النماذج
 library;
 
+import '../constants/educational_consts.dart';
+
 class FormUtils {
   /// List of educational stages
-  static List<String> get stages => ['ابتدائي', 'متوسط', 'ثانوي', 'جامعة'];
+  static List<String> get stages => EducationalStages.allGrades;
 
   /// Format phone number for display
   static String formatPhone(String phone) {
@@ -45,5 +47,3 @@ class FormUtils {
     }
   }
 }
-
-

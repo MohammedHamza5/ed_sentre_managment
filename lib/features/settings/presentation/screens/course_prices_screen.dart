@@ -10,6 +10,7 @@ import '../../data/repositories/settings_repository.dart';
 import '../../../subjects/data/repositories/subjects_repository.dart';
 import '../../../teachers/data/repositories/teachers_repository.dart';
 import '../../../../shared/models/models.dart';
+import '../../../../core/constants/educational_consts.dart';
 
 class CoursePricesScreen extends StatefulWidget {
   final String? initialSubjectName;
@@ -379,7 +380,7 @@ class _CoursePricesScreenState extends State<CoursePricesScreen> {
     String? selectedTeacherId = existingPrice?.teacherId;
     String? selectedGradeLevel = existingPrice?.gradeLevel;
 
-    final gradeLevels = ['أولى ثانوي', 'ثانية ثانوي', 'ثالثة ثانوي'];
+    final gradeLevels = EducationalStages.allGrades;
 
     // التأكد من أن المرحلة موجودة في القائمة
     if (selectedGradeLevel != null &&

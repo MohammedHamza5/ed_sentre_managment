@@ -1079,6 +1079,24 @@ class GroupsRemoteSource {
     // Direct match
     if (studentStage == groupStage) return true;
 
+    // Protect against mixing different types of stages
+    bool studentIsPrep =
+        studentStage.contains('إعدادي') || studentStage.contains('إ');
+    bool groupIsPrep =
+        groupStage.contains('إعدادي') || groupStage.contains('إ');
+    if (studentIsPrep != groupIsPrep) return false;
+
+    bool studentIsSec =
+        studentStage.contains('ثانوي') || studentStage.contains('ث');
+    bool groupIsSec = groupStage.contains('ثانوي') || groupStage.contains('ث');
+    if (studentIsSec != groupIsSec) return false;
+
+    bool studentIsPri =
+        studentStage.contains('ابتدائي') || studentStage.contains('ب');
+    bool groupIsPri =
+        groupStage.contains('ابتدائي') || groupStage.contains('ب');
+    if (studentIsPri != groupIsPri) return false;
+
     // Normalize both to a common format for comparison
     final studentNormalized = _normalizeStage(studentStage);
     final groupNormalized = _normalizeStage(groupStage);

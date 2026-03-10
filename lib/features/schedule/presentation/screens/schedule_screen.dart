@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/educational_consts.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/providers/center_provider.dart';
@@ -1360,19 +1361,14 @@ class _ScheduleViewState extends State<_ScheduleView> {
                                 ),
                               ),
                             ),
-                            items:
-                                [
-                                      'الصف الأول الثانوي',
-                                      'الصف الثاني الثانوي',
-                                      'الصف الثالث الثانوي',
-                                    ]
-                                    .map(
-                                      (level) => DropdownMenuItem(
-                                        value: level,
-                                        child: Text(level),
-                                      ),
-                                    )
-                                    .toList(),
+                            items: EducationalStages.allGrades
+                                .map(
+                                  (level) => DropdownMenuItem(
+                                    value: level,
+                                    child: Text(level),
+                                  ),
+                                )
+                                .toList(),
                             onChanged: (value) => setState(() {
                               selectedGradeLevel = value;
                               // RESET Group when Grade Level changes to avoid Crash

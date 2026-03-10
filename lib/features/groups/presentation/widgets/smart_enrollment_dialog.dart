@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../../../../shared/models/models.dart';
 import '../../models/smart_enrollment_models.dart';
 import '../../data/repositories/groups_repository.dart';
+import '../../../../core/constants/educational_consts.dart';
 
 class SmartEnrollmentDialog extends StatefulWidget {
   final Group group;
@@ -67,9 +68,9 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('فشل تحميل الطلاب: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('فشل تحميل الطلاب: $e')));
       }
     }
   }
@@ -166,7 +167,9 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
         ),
         backgroundColor: result.isFullSuccess ? Colors.green : Colors.orange,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.r),
+        ),
       ),
     );
   }
@@ -175,7 +178,8 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final availableSlots = widget.group.maxStudents - widget.group.currentStudents;
+    final availableSlots =
+        widget.group.maxStudents - widget.group.currentStudents;
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -227,7 +231,7 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
                         ),
                       ),
                       SizedBox(width: 12.w),
-                      
+
                       // Title
                       Expanded(
                         child: Column(
@@ -251,12 +255,15 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
                           ],
                         ),
                       ),
-                      
+
                       // Available Slots Badge
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 8.h,
+                        ),
                         decoration: BoxDecoration(
-                          color: availableSlots > 0 
+                          color: availableSlots > 0
                               ? Colors.green.withValues(alpha: 0.3)
                               : Colors.red.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(20.r),
@@ -265,7 +272,11 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.event_seat, size: 18.sp, color: Colors.white),
+                            Icon(
+                              Icons.event_seat,
+                              size: 18.sp,
+                              color: Colors.white,
+                            ),
                             SizedBox(width: 6.w),
                             Text(
                               '$availableSlots متاح',
@@ -280,7 +291,7 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
                       ),
                     ],
                   ),
-                  
+
                   // Info Chips Row
                   SizedBox(height: 16.h),
                   SingleChildScrollView(
@@ -288,14 +299,23 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
                     child: Row(
                       children: [
                         if (widget.group.courseName != null)
-                          _buildHeaderChip(Icons.book, widget.group.courseName!),
+                          _buildHeaderChip(
+                            Icons.book,
+                            widget.group.courseName!,
+                          ),
                         if (widget.group.gradeLevel != null) ...[
                           SizedBox(width: 8.w),
-                          _buildHeaderChip(Icons.school, _shortenGrade(widget.group.gradeLevel!)),
+                          _buildHeaderChip(
+                            Icons.school,
+                            _shortenGrade(widget.group.gradeLevel!),
+                          ),
                         ],
                         if (widget.group.scheduleText.isNotEmpty) ...[
                           SizedBox(width: 8.w),
-                          _buildHeaderChip(Icons.schedule, widget.group.scheduleText),
+                          _buildHeaderChip(
+                            Icons.schedule,
+                            widget.group.scheduleText,
+                          ),
                         ],
                       ],
                     ),
@@ -320,11 +340,15 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
                   decoration: InputDecoration(
                     hintText: '🔍 بحث بالاسم أو رقم الهاتف...',
                     hintStyle: GoogleFonts.cairo(
-                      color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
+                      color: isDark
+                          ? Colors.grey.shade500
+                          : Colors.grey.shade600,
                     ),
                     prefixIcon: Icon(
                       Icons.search_rounded,
-                      color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
+                      color: isDark
+                          ? Colors.grey.shade500
+                          : Colors.grey.shade600,
                     ),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
@@ -336,7 +360,10 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
                           )
                         : null,
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 14.h,
+                    ),
                   ),
                 ),
               ),
@@ -345,9 +372,7 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
             // ═══════════════════════════════════════════════════════════
             // STUDENTS LIST
             // ═══════════════════════════════════════════════════════════
-            Expanded(
-              child: _buildStudentsList(isDark),
-            ),
+            Expanded(child: _buildStudentsList(isDark)),
 
             // ═══════════════════════════════════════════════════════════
             // BOTTOM ACTIONS
@@ -356,7 +381,9 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF161B22) : Colors.grey.shade50,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(24.r)),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(24.r),
+                ),
                 border: Border(
                   top: BorderSide(
                     color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
@@ -368,7 +395,10 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
                   // Selected Count
                   if (_selectedStudentIds.isNotEmpty)
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12.w,
+                        vertical: 6.h,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF667EEA).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12.r),
@@ -381,21 +411,23 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
                         ),
                       ),
                     ),
-                  
+
                   const Spacer(),
-                  
+
                   // Cancel Button
                   TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: Text(
                       'إلغاء',
                       style: GoogleFonts.cairo(
-                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
+                        color: isDark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade700,
                       ),
                     ),
                   ),
                   SizedBox(width: 8.w),
-                  
+
                   // Enroll Button
                   FilledButton.icon(
                     onPressed: _selectedStudentIds.isEmpty || _isEnrolling
@@ -417,7 +449,10 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
                     ),
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF667EEA),
-                      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20.w,
+                        vertical: 12.h,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.r),
                       ),
@@ -446,10 +481,7 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
           SizedBox(width: 6.w),
           Text(
             label,
-            style: GoogleFonts.cairo(
-              color: Colors.white,
-              fontSize: 12.sp,
-            ),
+            style: GoogleFonts.cairo(color: Colors.white, fontSize: 12.sp),
           ),
         ],
       ),
@@ -462,9 +494,7 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(
-              color: const Color(0xFF667EEA),
-            ),
+            CircularProgressIndicator(color: const Color(0xFF667EEA)),
             SizedBox(height: 16.h),
             Text(
               'جاري تحميل طلاب المادة...',
@@ -526,11 +556,15 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
                 ),
               ),
               const Spacer(),
-              if (_selectedStudentIds.length < _filteredStudents.where((s) => !s.hasConflict).length)
+              if (_selectedStudentIds.length <
+                  _filteredStudents.where((s) => !s.hasConflict).length)
                 TextButton.icon(
                   onPressed: _selectAll,
                   icon: Icon(Icons.select_all, size: 18.sp),
-                  label: Text('تحديد الكل', style: GoogleFonts.cairo(fontSize: 12.sp)),
+                  label: Text(
+                    'تحديد الكل',
+                    style: GoogleFonts.cairo(fontSize: 12.sp),
+                  ),
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 8.w),
                   ),
@@ -539,7 +573,10 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
                 TextButton.icon(
                   onPressed: _clearSelection,
                   icon: Icon(Icons.deselect, size: 18.sp),
-                  label: Text('إلغاء', style: GoogleFonts.cairo(fontSize: 12.sp)),
+                  label: Text(
+                    'إلغاء',
+                    style: GoogleFonts.cairo(fontSize: 12.sp),
+                  ),
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 8.w),
                   ),
@@ -547,9 +584,9 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
             ],
           ),
         ),
-        
+
         SizedBox(height: 8.h),
-        
+
         // Students List
         Expanded(
           child: ListView.builder(
@@ -580,8 +617,8 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
           color: isSelected
               ? const Color(0xFF667EEA)
               : student.hasConflict
-                  ? Colors.orange.shade300
-                  : (isDark ? Colors.grey.shade700 : Colors.grey.shade200),
+              ? Colors.orange.shade300
+              : (isDark ? Colors.grey.shade700 : Colors.grey.shade200),
           width: isSelected ? 2 : 1,
         ),
         boxShadow: isSelected
@@ -610,7 +647,11 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
                     color: Colors.orange.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.warning_rounded, color: Colors.orange, size: 22.sp),
+                  child: Icon(
+                    Icons.warning_rounded,
+                    color: Colors.orange,
+                    size: 22.sp,
+                  ),
                 )
               else
                 Checkbox(
@@ -658,7 +699,9 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
                         student.phone!,
                         style: TextStyle(
                           fontSize: 12.sp,
-                          color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
+                          color: isDark
+                              ? Colors.grey.shade500
+                              : Colors.grey.shade600,
                         ),
                       ),
                   ],
@@ -668,7 +711,10 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
               // Groups Count Badge
               if (student.currentGroupsCount > 0)
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 4.h,
+                  ),
                   decoration: BoxDecoration(
                     color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(8.r),
@@ -679,7 +725,9 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
                       Icon(
                         Icons.groups_rounded,
                         size: 14.sp,
-                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                        color: isDark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600,
                       ),
                       SizedBox(width: 4.w),
                       Text(
@@ -687,7 +735,9 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                          color: isDark
+                              ? Colors.grey.shade400
+                              : Colors.grey.shade600,
                         ),
                       ),
                     ],
@@ -701,9 +751,6 @@ class _SmartEnrollmentDialogState extends State<SmartEnrollmentDialog> {
   }
 
   String _shortenGrade(String grade) {
-    if (grade.contains('الأول')) return '1 ثانوي';
-    if (grade.contains('الثاني')) return '2 ثانوي';
-    if (grade.contains('الثالث')) return '3 ثانوي';
-    return grade;
+    return EducationalStages.getShortName(grade);
   }
 }

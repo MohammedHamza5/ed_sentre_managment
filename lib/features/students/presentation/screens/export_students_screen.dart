@@ -5,16 +5,14 @@ library;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../shared/models/models.dart';
+import '../../../../core/constants/educational_consts.dart';
 
 enum ExportFormat { pdf, excel, csv }
 
 class ExportStudentsScreen extends StatefulWidget {
   final List<Student>? preSelectedStudents;
 
-  const ExportStudentsScreen({
-    super.key,
-    this.preSelectedStudents,
-  });
+  const ExportStudentsScreen({super.key, this.preSelectedStudents});
 
   @override
   State<ExportStudentsScreen> createState() => _ExportStudentsScreenState();
@@ -204,11 +202,7 @@ class _ExportStudentsScreenState extends State<ExportStudentsScreen> {
         ),
         child: Column(
           children: [
-            Icon(
-              icon,
-              color: color,
-              size: 32,
-            ),
+            Icon(icon, color: color, size: 32),
             const SizedBox(height: 8),
             Text(
               label,
@@ -273,11 +267,11 @@ class _ExportStudentsScreenState extends State<ExportStudentsScreen> {
                 ),
                 filled: true,
               ),
-              items: const [
-                DropdownMenuItem(value: null, child: Text('الكل')),
-                DropdownMenuItem(value: '1ثانوي', child: Text('الأول الثانوي')),
-                DropdownMenuItem(value: '2ثانوي', child: Text('الثاني الثانوي')),
-                DropdownMenuItem(value: '3ثانوي', child: Text('الثالث الثانوي')),
+              items: [
+                const DropdownMenuItem(value: null, child: Text('الكل')),
+                ...EducationalStages.allGrades.map(
+                  (grade) => DropdownMenuItem(value: grade, child: Text(grade)),
+                ),
               ],
               onChanged: (value) => setState(() => _selectedGrade = value),
             ),
@@ -298,13 +292,21 @@ class _ExportStudentsScreenState extends State<ExportStudentsScreen> {
               items: const [
                 DropdownMenuItem(value: null, child: Text('الكل')),
                 DropdownMenuItem(
-                    value: StudentStatus.active, child: Text('نشط')),
+                  value: StudentStatus.active,
+                  child: Text('نشط'),
+                ),
                 DropdownMenuItem(
-                    value: StudentStatus.inactive, child: Text('غير نشط')),
+                  value: StudentStatus.inactive,
+                  child: Text('غير نشط'),
+                ),
                 DropdownMenuItem(
-                    value: StudentStatus.suspended, child: Text('موقوف')),
+                  value: StudentStatus.suspended,
+                  child: Text('موقوف'),
+                ),
                 DropdownMenuItem(
-                    value: StudentStatus.overdue, child: Text('متأخر')),
+                  value: StudentStatus.overdue,
+                  child: Text('متأخر'),
+                ),
               ],
               onChanged: (value) => setState(() => _selectedStatus = value),
             ),
@@ -362,14 +364,15 @@ class _ExportStudentsScreenState extends State<ExportStudentsScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.lock_rounded, size: 16, color: Colors.grey.shade600),
+                  Icon(
+                    Icons.lock_rounded,
+                    size: 16,
+                    color: Colors.grey.shade600,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'مضمنة دائماً: الاسم، رقم الطالب',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey.shade700,
-                    ),
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
                   ),
                 ],
               ),
@@ -447,10 +450,7 @@ class _ExportStudentsScreenState extends State<ExportStudentsScreen> {
             : const Icon(Icons.download_rounded),
         label: Text(
           _isLoading ? 'جاري التصدير...' : 'تصدير البيانات',
-          style: GoogleFonts.cairo(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: GoogleFonts.cairo(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         style: FilledButton.styleFrom(
           shape: RoundedRectangleBorder(
@@ -508,5 +508,3 @@ class _ExportStudentsScreenState extends State<ExportStudentsScreen> {
     }
   }
 }
-
-

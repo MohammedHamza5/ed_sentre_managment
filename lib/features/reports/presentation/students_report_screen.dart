@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/providers/center_provider.dart';
 import '../../../../shared/models/models.dart';
 import '../services/report_export_service.dart';
+import '../../../../core/constants/educational_consts.dart';
 import '../data/reports_repository.dart';
 
 class StudentsReportScreen extends StatefulWidget {
@@ -232,11 +233,14 @@ class _StudentsReportScreenState extends State<StudentsReportScreen> {
                       ),
                       filled: true,
                     ),
-                    items: const [
-                      DropdownMenuItem(value: null, child: Text('الكل')),
-                      DropdownMenuItem(value: '1ثانوي', child: Text('1ث')),
-                      DropdownMenuItem(value: '2ثانوي', child: Text('2ث')),
-                      DropdownMenuItem(value: '3ثانوي', child: Text('3ث')),
+                    items: [
+                      const DropdownMenuItem(value: null, child: Text('الكل')),
+                      ...EducationalStages.allGrades.map((grade) {
+                        return DropdownMenuItem(
+                          value: grade,
+                          child: Text(EducationalStages.getShortName(grade)),
+                        );
+                      }),
                     ],
                     onChanged: (value) {
                       setState(() => _selectedGrade = value);

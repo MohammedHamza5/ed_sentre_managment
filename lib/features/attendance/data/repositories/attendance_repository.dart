@@ -93,6 +93,7 @@ class AttendanceRepository {
   Future<Map<String, dynamic>> startAttendanceSession({
     required String groupId,
     int durationMinutes = 60,
+    int onTimeMinutes = 15,
   }) async {
     if (!_networkMonitor.isOnline) {
       throw Exception('Starting session is only available online');
@@ -100,6 +101,7 @@ class AttendanceRepository {
     return await _remoteSource.startAttendanceSession(
       groupId: groupId,
       durationMinutes: durationMinutes,
+      onTimeMinutes: onTimeMinutes,
     );
   }
 

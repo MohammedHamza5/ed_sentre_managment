@@ -47,6 +47,7 @@ class AttendanceRemoteSource {
   Future<Map<String, dynamic>> startAttendanceSession({
     required String groupId,
     int durationMinutes = 60,
+    int onTimeMinutes = 15,
   }) async {
     final centerId = await _getCenterId();
     final userId = SupabaseClientManager.currentUser?.id;
@@ -62,6 +63,7 @@ class AttendanceRemoteSource {
           'p_center_id': centerId,
           'p_created_by': userId,
           'p_duration_minutes': durationMinutes,
+          'p_on_time_minutes': onTimeMinutes,
         },
       );
 

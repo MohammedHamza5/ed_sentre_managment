@@ -17,12 +17,14 @@ class QRAttendanceScreen extends StatefulWidget {
   final String groupId;
   final String groupName;
   final int durationMinutes;
+  final int onTimeMinutes;
 
   const QRAttendanceScreen({
     super.key,
     required this.groupId,
     required this.groupName,
     this.durationMinutes = 90,
+    this.onTimeMinutes = 15,
   });
 
   @override
@@ -63,6 +65,7 @@ class _QRAttendanceScreenState extends State<QRAttendanceScreen> {
           .startAttendanceSession(
             groupId: widget.groupId,
             durationMinutes: widget.durationMinutes,
+            onTimeMinutes: widget.onTimeMinutes,
           );
 
       setState(() {
@@ -651,5 +654,3 @@ class _QRAttendanceScreenState extends State<QRAttendanceScreen> {
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 }
-
-

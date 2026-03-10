@@ -297,6 +297,145 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     RefreshDashboard event,
     Emitter<DashboardState> emit,
   ) async {
-    await _onLoadDashboard(LoadDashboard(), emit);
+    // We want to force refresh the data from the remote source.
+    // We should modify _onLoadDashboard to accept a forceRefresh parameter
+    // or just pass forceRefresh directly to the repo here.
+    emit(state.copyWith(status: DashboardStatus.loading));
+
+    try {
+      final stopwatch = Stopwatch()..start();
+      AppLogger.performance('🚀 [DashboardBloc] Force Refreshing Dashboard...');
+
+      final dashboardData = await _repo.getDashboardSummary(
+        centerId: centerId,
+        forceRefresh: true,
+      );
+
+      if (dashboardData.isEmpty) {
+        AppLogger.warning('⚠️ [DashboardBloc] Empty response on refresh');
+      }
+
+      // 1. Parsing Stats
+      final stats = DashboardStats(
+        totalStudents: dashboardData['student_count'] ?? 0,
+        activeStudents: dashboardData['active_students'] ?? 0,
+        totalTeachers: dashboardData['teacher_count'] ?? 0,
+        totalStudentsChange: 0.0,
+        totalTeachersChange: 0.0,
+        totalSubjects: dashboardData['course_count'] ?? 0,
+        todayRevenue:
+            (dashboardData['today_revenue'] as num?)?.toDouble() ?? 0.0,
+        todayRevenueChange: 0.0,
+        monthlyRevenue:
+            (dashboardData['monthly_revenue_total'] as num?)?.toDouble() ?? 0.0,
+        todaySessions: dashboardData['today_sessions_count'] ?? 0,
+        completedSessions: dashboardData['completed_sessions'] ?? 0,
+        attendanceRate:
+            (dashboardData['attendance_rate'] as num?)?.toDouble() ?? 0.0,
+        attendanceRateChange: 0.0,
+        totalGroups: dashboardData['group_count'] ?? 0,
+        activeGroups: dashboardData['group_count'] ?? 0,
+        fullGroups: dashboardData['full_groups'] ?? 0,
+        nextSessionTime: dashboardData['next_session_time'] as String?,
+        nextSessionName: dashboardData['next_session_name'] as String?,
+      );
+
+      // 2. Parsing Lists (Direct Mapping from JSON)
+      final todaySessionsList =
+          (dashboardData['today_sessions_list'] as List? ?? [])
+              .map(
+                (json) => ScheduleSession(
+                  id: json['id'] ?? '',
+                  subjectId: json['subjectId'] ?? '',
+                  subjectName: json['subjectName'] ?? '',
+                  teacherId: json['teacherId'] ?? '',
+                  teacherName: json['teacherName'] ?? '',
+                  roomId: json['roomId'] ?? '',
+                  roomName: json['roomName'] ?? 'غير محدد',
+                  startTime: json['startTime'] ?? '',
+                  endTime: json['endTime'] ?? '',
+                  groupName: json['groupName'],
+                  status: _parseSessionStatus(json['status']),
+                  dayOfWeek: DateTime.now().weekday % 7 + 1,
+                ),
+              )
+              .toList();
+
+      final overduePaymentsList =
+          (dashboardData['overdue_invoices_list'] as List? ?? []).map((json) {
+            return Payment(
+              id: json['id'] ?? '',
+              studentId: json['studentId'] ?? '',
+              studentName: json['studentName'] ?? '',
+              amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
+              paidAmount: 0,
+              status: PaymentStatus.overdue,
+              dueDate: DateTime.tryParse(json['dueDate'] ?? ''),
+              month: DateTime.now().month.toString(),
+              method: PaymentMethod.cash,
+            );
+          }).toList();
+
+      final weeklyAttendance = List<Map<String, dynamic>>.from(
+        dashboardData['weekly_attendance_chart'] ?? [],
+      );
+      final monthlyRevenueData = List<Map<String, dynamic>>.from(
+        dashboardData['monthly_revenue_chart'] ?? [],
+      );
+
+      var rawDistribution = List<Map<String, dynamic>>.from(
+        dashboardData['student_distribution'] ?? [],
+      );
+
+      final totalDistributionCount = rawDistribution.fold<int>(
+        0,
+        (sum, item) => sum + (item['count'] as int? ?? 0),
+      );
+
+      final studentDistribution = rawDistribution.map((item) {
+        final count = item['count'] as int? ?? 0;
+        final percentage = totalDistributionCount == 0
+            ? 0.0
+            : (count / totalDistributionCount) * 100;
+        return {...item, 'percentage': percentage};
+      }).toList();
+
+      emit(
+        state.copyWith(
+          status: DashboardStatus.success,
+          stats: stats,
+          todaySessions: todaySessionsList,
+          recentNotifications: [],
+          overduePayments: overduePaymentsList,
+          weeklyAttendance: weeklyAttendance,
+          monthlyRevenue: monthlyRevenueData,
+          studentDistribution: studentDistribution,
+          centerPulse: dashboardData['center_pulse'] ?? {'score': 0},
+          financialForecast: dashboardData['financial_forecast'] ?? {},
+        ),
+      );
+      stopwatch.stop();
+      AppLogger.success(
+        '✅ [DashboardBloc] Refresh Loaded Successfully',
+        data: {
+          'total_ms': stopwatch.elapsedMilliseconds,
+          'sessions_count': todaySessionsList.length,
+          'overdue_count': overduePaymentsList.length,
+        },
+      );
+    } catch (e, stack) {
+      AppLogger.error(
+        '❌ [DashboardBloc] Refresh Failed',
+        error: e,
+        stackTrace: stack,
+        source: ErrorSource.backend,
+      );
+      emit(
+        state.copyWith(
+          status: DashboardStatus.failure,
+          errorMessage: 'خطأ في تحديث البيانات: $e',
+        ),
+      );
+    }
   }
 }

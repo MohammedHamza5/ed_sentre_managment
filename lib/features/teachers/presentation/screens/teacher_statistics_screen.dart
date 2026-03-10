@@ -44,12 +44,14 @@ class _TeacherStatisticsScreenState extends State<TeacherStatisticsScreen>
 
     try {
       final data = await _repo.getTeacherStatistics();
+      if (!mounted) return;
       setState(() {
         _data = data;
         _isLoading = false;
       });
       _animController.forward();
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _isLoading = false;

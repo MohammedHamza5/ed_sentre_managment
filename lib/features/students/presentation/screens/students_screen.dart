@@ -291,6 +291,7 @@ class _StudentsView extends StatelessWidget {
                               'students_list_${DateTime.now().millisecondsSinceEpoch}.pdf',
                         );
                       } catch (e) {
+                        if (!context.mounted) return;
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(

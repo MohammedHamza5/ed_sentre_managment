@@ -1319,6 +1319,7 @@ class _ScheduleViewState extends State<_ScheduleView> {
                                       },
                                     );
                                     if (picked != null) {
+                                      if (!mounted) return;
                                       setState(() {
                                         // Format as HH:mm
                                         final hour = picked.hour

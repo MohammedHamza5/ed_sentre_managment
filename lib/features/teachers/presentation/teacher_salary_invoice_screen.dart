@@ -135,7 +135,9 @@ class _TeacherSalaryInvoiceScreenState
             decoration: BoxDecoration(
               color: Colors.deepPurple.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.deepPurple.withValues(alpha: 0.3)),
+              border: Border.all(
+                color: Colors.deepPurple.withValues(alpha: 0.3),
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -351,7 +353,9 @@ class _TeacherSalaryInvoiceScreenState
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.5),
+                    ),
                   ),
                   child: Text(
                     statusText,
@@ -399,7 +403,10 @@ class _TeacherSalaryInvoiceScreenState
         const SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12),
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 12,
+          ),
         ),
         Text(
           value,
@@ -515,7 +522,9 @@ class _TeacherSalaryInvoiceScreenState
                     Text(
                       '${group['grade_level'] ?? ''} • ${fee.toStringAsFixed(0)} ج/طالب',
                       style: TextStyle(
-                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                        color: isDark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600,
                         fontSize: 12,
                       ),
                     ),
@@ -530,15 +539,21 @@ class _TeacherSalaryInvoiceScreenState
                 decoration: BoxDecoration(
                   color: collectionRate >= 80
                       ? (isDark ? Colors.green.shade900 : Colors.green.shade50)
-                      : (isDark ? Colors.orange.shade900 : Colors.orange.shade50),
+                      : (isDark
+                            ? Colors.orange.shade900
+                            : Colors.orange.shade50),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   '$collectionRate%',
                   style: TextStyle(
                     color: collectionRate >= 80
-                        ? (isDark ? Colors.green.shade300 : Colors.green.shade700)
-                        : (isDark ? Colors.orange.shade300 : Colors.orange.shade700),
+                        ? (isDark
+                              ? Colors.green.shade300
+                              : Colors.green.shade700)
+                        : (isDark
+                              ? Colors.orange.shade300
+                              : Colors.orange.shade700),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -551,13 +566,17 @@ class _TeacherSalaryInvoiceScreenState
             children: [
               Text(
                 '👥 $paidStudents/$totalStudents دفعوا',
-                style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade700),
+                style: TextStyle(
+                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
+                ),
               ),
               Text(
                 '${collected.toStringAsFixed(0)} ج → ${teacherShare.toStringAsFixed(0)} ج',
                 style: GoogleFonts.cairo(
                   fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.purple.shade300 : Colors.purple.shade700,
+                  color: isDark
+                      ? Colors.purple.shade300
+                      : Colors.purple.shade700,
                 ),
               ),
             ],
@@ -1566,6 +1585,7 @@ class _TeacherSalaryInvoiceScreenState
         onLayout: (PdfPageFormat format) async => pdf.save(),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('فشل الطباعة: $e')));
@@ -1581,6 +1601,7 @@ class _TeacherSalaryInvoiceScreenState
             'salary_${widget.teacherId}_${widget.month}_${widget.year}.pdf',
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('فشل التصدير: $e')));
@@ -1804,5 +1825,3 @@ class _TeacherSalaryInvoiceScreenState
     return pdf;
   }
 }
-
-

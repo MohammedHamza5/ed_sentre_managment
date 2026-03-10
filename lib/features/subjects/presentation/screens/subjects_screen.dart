@@ -498,7 +498,11 @@ class _SubjectsView extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 DropdownButtonFormField<String>(
-                  value: selectedTeacher,
+                  value:
+                      (selectedTeacher == null ||
+                          teachers.any((t) => t.id == selectedTeacher))
+                      ? selectedTeacher
+                      : null,
                   decoration: InputDecoration(
                     labelText: strings.teacher,
                     border: OutlineInputBorder(

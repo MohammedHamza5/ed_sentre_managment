@@ -193,15 +193,15 @@ class _ReportsViewState extends State<_ReportsView> {
                 SizedBox(height: AppSpacing.md.h),
 
                 // Reports Grid with Enhanced Cards
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 280.w,
-                      crossAxisSpacing: AppSpacing.lg.w,
-                      mainAxisSpacing: AppSpacing.lg.h,
-                      childAspectRatio: 1.3,
-                    ),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 280.w,
+                    crossAxisSpacing: AppSpacing.lg.w,
+                    mainAxisSpacing: AppSpacing.lg.h,
+                    childAspectRatio: 1.3,
+                  ),
                   itemCount: reports.length,
                   itemBuilder: (context, index) {
                     final report = reports[index];
@@ -333,7 +333,11 @@ class _ReportsViewState extends State<_ReportsView> {
                 color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Icon(Icons.auto_graph_rounded, color: Colors.white, size: 32),
+              child: const Icon(
+                Icons.auto_graph_rounded,
+                color: Colors.white,
+                size: 32,
+              ),
             ),
             const SizedBox(width: AppSpacing.lg),
             Expanded(
@@ -365,7 +369,11 @@ class _ReportsViewState extends State<_ReportsView> {
                 color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 20),
+              child: const Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ],
         ),
@@ -392,9 +400,7 @@ class _ReportsViewState extends State<_ReportsView> {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -422,19 +428,22 @@ class _ReportsViewState extends State<_ReportsView> {
                 label: 'تقرير اليوم',
                 icon: Icons.today,
                 color: AppColors.info,
-                onPressed: () => _quickGenerate(context, PresetPeriod.today, 'general'),
+                onPressed: () =>
+                    _quickGenerate(context, PresetPeriod.today, 'general'),
               ),
               _QuickActionButton(
                 label: 'تقرير الأسبوع',
                 icon: Icons.date_range,
                 color: AppColors.success,
-                onPressed: () => _quickGenerate(context, PresetPeriod.thisWeek, 'general'),
+                onPressed: () =>
+                    _quickGenerate(context, PresetPeriod.thisWeek, 'general'),
               ),
               _QuickActionButton(
                 label: 'تقرير الشهر',
                 icon: Icons.calendar_month,
                 color: AppColors.warning,
-                onPressed: () => _quickGenerate(context, PresetPeriod.thisMonth, 'general'),
+                onPressed: () =>
+                    _quickGenerate(context, PresetPeriod.thisMonth, 'general'),
               ),
             ],
           ),
@@ -515,7 +524,11 @@ class _ReportsViewState extends State<_ReportsView> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.info_outline, size: 16.sp, color: AppColors.primary),
+                  Icon(
+                    Icons.info_outline,
+                    size: 16.sp,
+                    color: AppColors.primary,
+                  ),
                   SizedBox(width: AppSpacing.xs.w),
                   Text(
                     'الفترة: ${_dateRange!.start.day}/${_dateRange!.start.month}/${_dateRange!.start.year} - ${_dateRange!.end.day}/${_dateRange!.end.month}/${_dateRange!.end.year}',
@@ -537,7 +550,7 @@ class _ReportsViewState extends State<_ReportsView> {
     ReportData report,
   ) {
     final color = _reportColors[report.type] ?? AppColors.primary;
-    
+
     return Container(
       padding: EdgeInsets.all(AppSpacing.lg.w),
       decoration: BoxDecoration(
@@ -722,8 +735,14 @@ class _ReportsViewState extends State<_ReportsView> {
         final lastDayOfLastMonth = DateTime(now.year, now.month, 0);
         _dateRange = DateTimeRange(
           start: DateTime(lastMonth.year, lastMonth.month, 1),
-          end: DateTime(lastDayOfLastMonth.year, lastDayOfLastMonth.month,
-              lastDayOfLastMonth.day, 23, 59, 59),
+          end: DateTime(
+            lastDayOfLastMonth.year,
+            lastDayOfLastMonth.month,
+            lastDayOfLastMonth.day,
+            23,
+            59,
+            59,
+          ),
         );
         break;
       case PresetPeriod.custom:
@@ -741,6 +760,7 @@ class _ReportsViewState extends State<_ReportsView> {
       locale: strings.locale,
     );
     if (range != null) {
+      if (!mounted) return;
       setState(() {
         _selectedPeriod = PresetPeriod.custom;
         _dateRange = range;
@@ -748,13 +768,17 @@ class _ReportsViewState extends State<_ReportsView> {
     }
   }
 
-  void _quickGenerate(BuildContext context, PresetPeriod period, String reportType) {
+  void _quickGenerate(
+    BuildContext context,
+    PresetPeriod period,
+    String reportType,
+  ) {
     setState(() {
       _selectedReportType = reportType;
       _selectedPeriod = period;
       _updateDateRangeFromPreset(period);
     });
-    
+
     // Auto-generate after a short delay for UX
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) {
@@ -796,7 +820,9 @@ class _ReportsViewState extends State<_ReportsView> {
       case 'subjects':
         return state.totalSubjects > 0 ? '${state.totalSubjects}' : null;
       case 'payments':
-        return state.totalRevenue > 0 ? '${state.totalRevenue.toStringAsFixed(0)} EGP' : null;
+        return state.totalRevenue > 0
+            ? '${state.totalRevenue.toStringAsFixed(0)} EGP'
+            : null;
       default:
         return null;
     }
@@ -860,10 +886,7 @@ class _PeriodChip extends StatelessWidget {
       label: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (icon != null) ...[
-            Icon(icon, size: 16.sp),
-            SizedBox(width: 4.w),
-          ],
+          if (icon != null) ...[Icon(icon, size: 16.sp), SizedBox(width: 4.w)],
           Text(label),
         ],
       ),
@@ -964,15 +987,17 @@ class _EnhancedReportCardState extends State<_EnhancedReportCard> {
                       ),
                       child: Icon(
                         widget.icon,
-                        color: widget.isSelected
-                            ? Colors.white
-                            : widget.color,
+                        color: widget.isSelected ? Colors.white : widget.color,
                         size: 24.sp,
                       ),
                     ),
                     const Spacer(),
                     if (widget.isSelected)
-                      Icon(Icons.check_circle, color: widget.color, size: 20.sp),
+                      Icon(
+                        Icons.check_circle,
+                        color: widget.color,
+                        size: 20.sp,
+                      ),
                   ],
                 ),
                 Column(
@@ -1009,7 +1034,9 @@ class _EnhancedReportCardState extends State<_EnhancedReportCard> {
                         ),
                         decoration: BoxDecoration(
                           color: widget.color.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusSm,
+                          ),
                         ),
                         child: Text(
                           widget.lastValue!,
@@ -1081,5 +1108,3 @@ class _InfoChip extends StatelessWidget {
     );
   }
 }
-
-

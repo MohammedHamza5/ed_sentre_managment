@@ -16,11 +16,19 @@ const Map<String, Map<String, dynamic>> _predefinedRoles = {
     'color': Colors.blue,
     'description': 'إدارة كاملة للمركز',
     'permissions': [
-      'students.view', 'students.add', 'students.edit', 'students.delete',
-      'teachers.view', 'teachers.add', 'teachers.edit',
-      'groups.view', 'groups.manage',
-      'attendance.view', 'attendance.take',
-      'payments.view', 'payments.add',
+      'students.view',
+      'students.add',
+      'students.edit',
+      'students.delete',
+      'teachers.view',
+      'teachers.add',
+      'teachers.edit',
+      'groups.view',
+      'groups.manage',
+      'attendance.view',
+      'attendance.take',
+      'payments.view',
+      'payments.add',
       'reports.view',
       'settings.view',
     ],
@@ -33,7 +41,8 @@ const Map<String, Map<String, dynamic>> _predefinedRoles = {
     'description': 'إدارة المدفوعات والتقارير',
     'permissions': [
       'students.view',
-      'payments.view', 'payments.add',
+      'payments.view',
+      'payments.add',
       'reports.view',
     ],
   },
@@ -44,9 +53,12 @@ const Map<String, Map<String, dynamic>> _predefinedRoles = {
     'color': Colors.orange,
     'description': 'تسجيل الطلاب والحضور',
     'permissions': [
-      'students.view', 'students.add', 'students.edit',
+      'students.view',
+      'students.add',
+      'students.edit',
       'groups.view',
-      'attendance.view', 'attendance.take',
+      'attendance.view',
+      'attendance.take',
     ],
   },
   'teacher': {
@@ -58,7 +70,8 @@ const Map<String, Map<String, dynamic>> _predefinedRoles = {
     'permissions': [
       'students.view',
       'groups.view',
-      'attendance.view', 'attendance.take',
+      'attendance.view',
+      'attendance.take',
     ],
   },
 };
@@ -85,13 +98,13 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
 
   Future<void> _loadTeamMembers() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final centerProvider = context.read<CenterProvider>();
       _centerId = centerProvider.centerId;
-      
+
       debugPrint('👥 [Team] Loading team for center: $_centerId');
-      
+
       if (_centerId == null) {
         debugPrint('🔴 [Team] Center ID is null');
         return;
@@ -99,22 +112,24 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
 
       // Get all users in this center (excluding the owner)
       final currentUserId = SupabaseClientManager.client.auth.currentUser?.id;
-      
+
       final response = await SupabaseClientManager.client
           .from('users')
           .select('id, full_name, phone, role, is_active, created_at')
           .eq('default_center_id', _centerId!)
           .neq('id', currentUserId ?? '')
           .order('created_at', ascending: false);
-      
+
       debugPrint('👥 [Team] Loaded ${response.length} members');
-      
+
+      if (!mounted) return;
       setState(() {
         _teamMembers = List<Map<String, dynamic>>.from(response);
         _isLoading = false;
       });
     } catch (e) {
       debugPrint('🔴 [Team] Error: $e');
+      if (!mounted) return;
       setState(() => _isLoading = false);
     }
   }
@@ -122,20 +137,21 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
   Future<void> _updateMemberRole(String memberId, String newRole) async {
     try {
       debugPrint('👥 [Team] Updating role for $memberId to $newRole');
-      
+
       await SupabaseClientManager.client
           .from('users')
           .update({'role': newRole})
           .eq('id', memberId);
-      
+
       // Update local state
+      if (!mounted) return;
       setState(() {
         final index = _teamMembers.indexWhere((m) => m['id'] == memberId);
         if (index != -1) {
           _teamMembers[index]['role'] = newRole;
         }
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -201,14 +217,17 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
                   keyboardType: TextInputType.phone,
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Role Selection Cards
                 const Align(
                   alignment: Alignment.centerRight,
-                  child: Text('اختر الدور:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: Text(
+                    'اختر الدور:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
                 const SizedBox(height: 12),
-                
+
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -216,17 +235,23 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
                     final roleCode = entry.key;
                     final roleData = entry.value;
                     final isSelected = selectedRole == roleCode;
-                    
+
                     return InkWell(
-                      onTap: () => setDialogState(() => selectedRole = roleCode),
+                      onTap: () =>
+                          setDialogState(() => selectedRole = roleCode),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                         decoration: BoxDecoration(
-                          color: isSelected 
-                              ? (roleData['color'] as Color).withValues(alpha: 0.2)
+                          color: isSelected
+                              ? (roleData['color'] as Color).withValues(
+                                  alpha: 0.2,
+                                )
                               : Colors.transparent,
                           border: Border.all(
-                            color: isSelected 
+                            color: isSelected
                                 ? roleData['color'] as Color
                                 : Colors.grey.shade400,
                             width: isSelected ? 2 : 1,
@@ -245,7 +270,9 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
                             Text(
                               roleData['name_ar'] as String,
                               style: TextStyle(
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
                               ),
                             ),
                           ],
@@ -254,23 +281,29 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
                     );
                   }).toList(),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Role Description
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: (_predefinedRoles[selectedRole]!['color'] as Color).withValues(alpha: 0.1),
+                    color: (_predefinedRoles[selectedRole]!['color'] as Color)
+                        .withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.info_outline, color: _predefinedRoles[selectedRole]!['color'] as Color),
+                      Icon(
+                        Icons.info_outline,
+                        color:
+                            _predefinedRoles[selectedRole]!['color'] as Color,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          _predefinedRoles[selectedRole]!['description'] as String,
+                          _predefinedRoles[selectedRole]!['description']
+                              as String,
                           style: TextStyle(fontSize: 13),
                         ),
                       ),
@@ -321,7 +354,8 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
     try {
       final cleanPhone = phone.replaceAll(RegExp(r'[^0-9]'), '');
       final smartEmail = '$cleanPhone@edsentre.local';
-      final tempPassword = 'Ed${cleanPhone.substring(cleanPhone.length - 4)}${DateTime.now().millisecond}';
+      final tempPassword =
+          'Ed${cleanPhone.substring(cleanPhone.length - 4)}${DateTime.now().millisecond}';
 
       debugPrint('👥 [Team] Creating member: $smartEmail with role: $role');
 
@@ -350,19 +384,22 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
       }
 
       // 2. Insert/Update in users table via RPC
-      await SupabaseClientManager.client.rpc('admin_upsert_user', params: {
-        'p_user_id': authResponse.user!.id,
-        'p_full_name': name,
-        'p_phone': phone,
-        'p_role': role,
-        'p_center_id': _centerId,
-      });
+      await SupabaseClientManager.client.rpc(
+        'admin_upsert_user',
+        params: {
+          'p_user_id': authResponse.user!.id,
+          'p_full_name': name,
+          'p_phone': phone,
+          'p_role': role,
+          'p_center_id': _centerId,
+        },
+      );
 
       debugPrint('👥 [Team] Member created successfully');
 
       // Close dialog
       if (mounted) Navigator.pop(dialogContext);
-      
+
       // Refresh list
       await _loadTeamMembers();
 
@@ -383,7 +420,12 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
     }
   }
 
-  void _showAccessCard(String name, String phone, String password, String role) {
+  void _showAccessCard(
+    String name,
+    String phone,
+    String password,
+    String role,
+  ) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -422,7 +464,10 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
               const SizedBox(height: 16),
               Text(
                 name,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Text(
                 _predefinedRoles[role]?['name_ar'] ?? role,
@@ -435,9 +480,11 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
               const SizedBox(height: 16),
               OutlinedButton.icon(
                 onPressed: () {
-                  Clipboard.setData(ClipboardData(
-                    text: 'رقم الدخول: $phone\nكلمة المرور: $password',
-                  ));
+                  Clipboard.setData(
+                    ClipboardData(
+                      text: 'رقم الدخول: $phone\nكلمة المرور: $password',
+                    ),
+                  );
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('تم نسخ البيانات')),
                   );
@@ -502,13 +549,13 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
             .from('users')
             .update({'is_active': false})
             .eq('id', member['id']);
-        
+
         await _loadTeamMembers();
-        
+
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('تم حذف العضو')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('تم حذف العضو')));
         }
       } catch (e) {
         debugPrint('🔴 [Team] Error deleting: $e');
@@ -542,18 +589,21 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
               ),
             ),
           ],
         ),
-        
+
         const SizedBox(height: 8),
         Text(
           'أعضاء فريق العمل وصلاحياتهم',
           style: TextStyle(color: Colors.grey[600]),
         ),
-        
+
         const SizedBox(height: 24),
 
         // Content
@@ -566,7 +616,8 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: _teamMembers.length,
-            itemBuilder: (context, index) => _buildMemberCard(_teamMembers[index]),
+            itemBuilder: (context, index) =>
+                _buildMemberCard(_teamMembers[index]),
           ),
       ],
     );
@@ -584,10 +635,7 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
             style: TextStyle(fontSize: 18, color: Colors.grey[600]),
           ),
           const SizedBox(height: 8),
-          Text(
-            'أضف أول عضو للبدء',
-            style: TextStyle(color: Colors.grey[500]),
-          ),
+          Text('أضف أول عضو للبدء', style: TextStyle(color: Colors.grey[500])),
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: _showAddMemberDialog,
@@ -619,7 +667,9 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
                 // Avatar
                 CircleAvatar(
                   radius: 28,
-                  backgroundColor: (roleData['color'] as Color).withValues(alpha: 0.2),
+                  backgroundColor: (roleData['color'] as Color).withValues(
+                    alpha: 0.2,
+                  ),
                   child: Icon(
                     roleData['icon'] as IconData,
                     color: roleData['color'] as Color,
@@ -627,7 +677,7 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                
+
                 // Name & Phone
                 Expanded(
                   child: Column(
@@ -645,14 +695,20 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
                           if (!isActive) ...[
                             const SizedBox(width: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.red.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Text(
                                 'غير نشط',
-                                style: TextStyle(color: Colors.red, fontSize: 12),
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 12,
+                                ),
                               ),
                             ),
                           ],
@@ -672,14 +728,21 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
                     ],
                   ),
                 ),
-                
+
                 // Role Dropdown
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: (roleData['color'] as Color).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: (roleData['color'] as Color).withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: (roleData['color'] as Color).withValues(
+                        alpha: 0.3,
+                      ),
+                    ),
                   ),
                   child: DropdownButton<String>(
                     value: role,
@@ -691,7 +754,11 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(e.value['icon'] as IconData, size: 18, color: e.value['color'] as Color),
+                            Icon(
+                              e.value['icon'] as IconData,
+                              size: 18,
+                              color: e.value['color'] as Color,
+                            ),
                             const SizedBox(width: 8),
                             Text(e.value['name_ar'] as String),
                           ],
@@ -705,7 +772,7 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
                     },
                   ),
                 ),
-                
+
                 // Delete Button
                 IconButton(
                   icon: Icon(Icons.delete_outline, color: Colors.red[400]),
@@ -714,9 +781,9 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
                 ),
               ],
             ),
-            
+
             const Divider(height: 24),
-            
+
             // Permissions Preview - Show unique categories only
             Row(
               children: [
@@ -727,14 +794,16 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
                   child: Wrap(
                     spacing: 6,
                     runSpacing: 4,
-                    children: _getUniqueCategories(roleData['permissions'] as List<String>)
-                        .map((category) => _buildPermissionChip(category))
-                        .toList(),
+                    children:
+                        _getUniqueCategories(
+                              roleData['permissions'] as List<String>,
+                            )
+                            .map((category) => _buildPermissionChip(category))
+                            .toList(),
                   ),
                 ),
               ],
             ),
-
           ],
         ),
       ),
@@ -752,13 +821,41 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
 
   Widget _buildPermissionChip(String category) {
     final categoryData = {
-      'students': {'name': 'الطلاب', 'icon': Icons.school, 'color': Colors.blue},
-      'teachers': {'name': 'المعلمين', 'icon': Icons.person, 'color': Colors.purple},
-      'groups': {'name': 'المجموعات', 'icon': Icons.groups, 'color': Colors.teal},
-      'attendance': {'name': 'الحضور', 'icon': Icons.event_available, 'color': Colors.green},
-      'payments': {'name': 'المدفوعات', 'icon': Icons.payment, 'color': Colors.orange},
-      'reports': {'name': 'التقارير', 'icon': Icons.analytics, 'color': Colors.indigo},
-      'settings': {'name': 'الإعدادات', 'icon': Icons.settings, 'color': Colors.grey},
+      'students': {
+        'name': 'الطلاب',
+        'icon': Icons.school,
+        'color': Colors.blue,
+      },
+      'teachers': {
+        'name': 'المعلمين',
+        'icon': Icons.person,
+        'color': Colors.purple,
+      },
+      'groups': {
+        'name': 'المجموعات',
+        'icon': Icons.groups,
+        'color': Colors.teal,
+      },
+      'attendance': {
+        'name': 'الحضور',
+        'icon': Icons.event_available,
+        'color': Colors.green,
+      },
+      'payments': {
+        'name': 'المدفوعات',
+        'icon': Icons.payment,
+        'color': Colors.orange,
+      },
+      'reports': {
+        'name': 'التقارير',
+        'icon': Icons.analytics,
+        'color': Colors.indigo,
+      },
+      'settings': {
+        'name': 'الإعدادات',
+        'icon': Icons.settings,
+        'color': Colors.grey,
+      },
     };
 
     final data = categoryData[category];
@@ -780,13 +877,14 @@ class _TeamManagementWidgetState extends State<TeamManagementWidget> {
           const SizedBox(width: 4),
           Text(
             name,
-            style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              fontSize: 12,
+              color: color,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
     );
   }
-
 }
-
-

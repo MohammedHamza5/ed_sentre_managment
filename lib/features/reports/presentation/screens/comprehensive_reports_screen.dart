@@ -13,16 +13,18 @@ class ComprehensiveReportsScreen extends StatefulWidget {
   const ComprehensiveReportsScreen({super.key});
 
   @override
-  State<ComprehensiveReportsScreen> createState() => _ComprehensiveReportsScreenState();
+  State<ComprehensiveReportsScreen> createState() =>
+      _ComprehensiveReportsScreenState();
 }
 
-class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen> with SingleTickerProviderStateMixin {
+class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _reportsRepo = ReportsRepository();
-  
+
   DateTime _startDate = DateTime.now().subtract(const Duration(days: 30));
   DateTime _endDate = DateTime.now();
-  
+
   Map<String, dynamic> _overviewData = {};
   Map<String, dynamic> _attendanceData = {};
   Map<String, dynamic> _financialData = {};
@@ -45,10 +47,10 @@ class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
 
   Future<void> _loadAllReports() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final centerId = context.read<CenterProvider>().centerId ?? '';
-      
+
       final results = await Future.wait([
         _reportsRepo.getGeneralSummary(centerId),
         _reportsRepo.getAttendanceReport(centerId, _startDate, _endDate),
@@ -56,7 +58,9 @@ class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
         _reportsRepo.getTeacherSalaryReport(centerId, _startDate),
         _reportsRepo.getGroupsReport(centerId),
       ]);
-      
+
+      if (!mounted) return;
+
       setState(() {
         _overviewData = results[0];
         _attendanceData = results[1];
@@ -66,12 +70,11 @@ class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => _isLoading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('خطأ في تحميل التقارير: $e')),
-        );
-      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('خطأ في تحميل التقارير: $e')));
     }
   }
 
@@ -126,7 +129,10 @@ class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
                   children: [
                     const Text(
                       'التقارير الشاملة',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Row(
                       children: [
@@ -151,12 +157,17 @@ class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
                 TabBar(
                   controller: _tabController,
                   labelColor: AppColors.primary,
-                  unselectedLabelColor: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                  unselectedLabelColor: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.lightTextSecondary,
                   indicatorColor: AppColors.primary,
                   isScrollable: true,
                   tabs: const [
                     Tab(text: 'الملخص', icon: Icon(Icons.dashboard, size: 18)),
-                    Tab(text: 'المالية', icon: Icon(Icons.attach_money, size: 18)),
+                    Tab(
+                      text: 'المالية',
+                      icon: Icon(Icons.attach_money, size: 18),
+                    ),
                     Tab(text: 'الحضور', icon: Icon(Icons.people, size: 18)),
                     Tab(text: 'المعلمين', icon: Icon(Icons.person, size: 18)),
                     Tab(text: 'المجموعات', icon: Icon(Icons.groups, size: 18)),
@@ -191,7 +202,7 @@ class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
     final totalTeachers = _overviewData['totalTeachers'] ?? 0;
     final totalSubjects = _overviewData['totalSubjects'] ?? 0;
     final totalRooms = _overviewData['totalRooms'] ?? 0;
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
@@ -202,7 +213,7 @@ class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: AppSpacing.lg),
-          
+
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -256,7 +267,7 @@ class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: AppSpacing.lg),
-          
+
           Row(
             children: [
               Expanded(
@@ -278,11 +289,13 @@ class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
               ),
             ],
           ),
-          
+
           const SizedBox(height: AppSpacing.xl),
-          
+
           Card(
-            color: isDark ? AppColors.darkSurfaceVariant : AppColors.lightSurfaceVariant,
+            color: isDark
+                ? AppColors.darkSurfaceVariant
+                : AppColors.lightSurfaceVariant,
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: Column(
@@ -320,7 +333,7 @@ class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: AppSpacing.lg),
-          
+
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -355,9 +368,9 @@ class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
               ),
             ],
           ),
-          
+
           const SizedBox(height: AppSpacing.xl),
-          
+
           if (total == 0)
             const Center(
               child: Padding(
@@ -367,7 +380,9 @@ class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
             )
           else
             Card(
-              color: isDark ? AppColors.darkSurfaceVariant : AppColors.lightSurfaceVariant,
+              color: isDark
+                  ? AppColors.darkSurfaceVariant
+                  : AppColors.lightSurfaceVariant,
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Column(
@@ -375,7 +390,10 @@ class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
                   children: [
                     Text(
                       'تفاصيل الحضور ($total سجل)',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.md),
                     const Text('سيتم عرض جدول تفصيلي بسجلات الحضور قريباً'),
@@ -404,7 +422,7 @@ class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: AppSpacing.lg),
-          
+
           Row(
             children: [
               Expanded(
@@ -426,9 +444,9 @@ class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
               ),
             ],
           ),
-          
+
           const SizedBox(height: AppSpacing.md),
-          
+
           Row(
             children: [
               Expanded(
@@ -450,9 +468,9 @@ class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
               ),
             ],
           ),
-          
+
           const SizedBox(height: AppSpacing.xl),
-          
+
           if (teacherCount == 0)
             const Center(
               child: Padding(
@@ -490,7 +508,7 @@ class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
-          
+
           if (groups.isEmpty)
             const Center(
               child: Padding(
@@ -508,9 +526,11 @@ class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
                 final enrolled = group['enrolled'] ?? 0;
                 final capacity = group['capacity'] ?? 0;
                 final fillRate = capacity > 0 ? (enrolled / capacity * 100) : 0;
-                
+
                 return Card(
-                  color: isDark ? AppColors.darkSurfaceVariant : AppColors.lightSurfaceVariant,
+                  color: isDark
+                      ? AppColors.darkSurfaceVariant
+                      : AppColors.lightSurfaceVariant,
                   margin: const EdgeInsets.only(bottom: AppSpacing.md),
                   child: ListTile(
                     leading: CircleAvatar(
@@ -533,7 +553,13 @@ class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
                             const SizedBox(width: 4),
                             Text('$enrolled / $capacity طالب'),
                             const SizedBox(width: 16),
-                            Icon(Icons.trending_up, size: 16, color: fillRate > 80 ? AppColors.success : AppColors.warning),
+                            Icon(
+                              Icons.trending_up,
+                              size: 16,
+                              color: fillRate > 80
+                                  ? AppColors.success
+                                  : AppColors.warning,
+                            ),
                             const SizedBox(width: 4),
                             Text('${fillRate.toStringAsFixed(0)}%'),
                           ],
@@ -556,5 +582,3 @@ class _ComprehensiveReportsScreenState extends State<ComprehensiveReportsScreen>
     );
   }
 }
-
-

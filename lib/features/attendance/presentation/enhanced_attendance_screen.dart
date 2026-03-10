@@ -217,6 +217,7 @@ class _EnhancedAttendanceScreenState extends State<EnhancedAttendanceScreen> {
                             initialDate: _selectedDate,
                           );
                           if (d != null) {
+                            if (!mounted) return;
                             setState(() => _selectedDate = d);
                             _loadAttendanceSheet();
                           }
@@ -541,5 +542,3 @@ class _EnhancedAttendanceScreenState extends State<EnhancedAttendanceScreen> {
     );
   }
 }
-
-

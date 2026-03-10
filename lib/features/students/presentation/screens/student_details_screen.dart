@@ -81,11 +81,13 @@ class _StudentDetailsScreenState extends State<StudentDetailsScreen>
       // 5. Fetch Payments
       _payments = await paymentsRepo.getPaymentsByStudent(widget.studentId);
 
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
     } catch (e) {
       debugPrint('Error loading student details: $e');
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
         _error = 'فشل تحميل بيانات الطالب: $e';
@@ -707,17 +709,22 @@ class _SubjectsTabState extends State<_SubjectsTab> {
                     final data = widget.subjectsWithTeachers[index];
                     // البيانات تأتي من API كـ 'courses' وليس 'subject'
                     final courseData = data['courses'] as Map<String, dynamic>?;
-                    
+
                     if (courseData == null) return const SizedBox.shrink();
-                    
-                    final courseName = courseData['name'] as String? ?? 'غير محدد';
-                    final courseFee = (courseData['fee'] as num?)?.toDouble() ?? 0;
+
+                    final courseName =
+                        courseData['name'] as String? ?? 'غير محدد';
+                    final courseFee =
+                        (courseData['fee'] as num?)?.toDouble() ?? 0;
 
                     return _SubjectRow(
                       name: courseName,
-                      teacher: 'غير محدد', // المعلم غير متاح في البيانات الحالية
+                      teacher:
+                          'غير محدد', // المعلم غير متاح في البيانات الحالية
                       sessions: '--',
-                      fee: courseFee > 0 ? '${courseFee.toStringAsFixed(0)} ج' : 'حسب جدول الأسعار',
+                      fee: courseFee > 0
+                          ? '${courseFee.toStringAsFixed(0)} ج'
+                          : 'حسب جدول الأسعار',
                       status: data['status'] == 'active' ? 'نشط' : 'غير نشط',
                     );
                   },
@@ -735,7 +742,10 @@ class _SubjectsTabState extends State<_SubjectsTab> {
 
     // Get currently enrolled subject IDs - البيانات تأتي كـ 'courses'
     final enrolledIds = widget.subjectsWithTeachers
-        .map((data) => (data['courses'] as Map<String, dynamic>?)?['id'] as String?)
+        .map(
+          (data) =>
+              (data['courses'] as Map<String, dynamic>?)?['id'] as String?,
+        )
         .whereType<String>()
         .toSet();
 
@@ -1090,5 +1100,3 @@ class _PaymentsTab extends StatelessWidget {
     }
   }
 }
-
-

@@ -13,7 +13,7 @@ class MessagesScreen extends StatefulWidget {
 
 class _MessagesScreenState extends State<MessagesScreen> {
   // TODO: Replace with real data from SupabaseRepository
-  final List<Map<String, dynamic>> _messages = []; 
+  final List<Map<String, dynamic>> _messages = [];
   bool _isLoading = false;
 
   @override
@@ -26,6 +26,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
     setState(() => _isLoading = true);
     // Simulate loading
     await Future.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
     setState(() => _isLoading = false);
   }
 
@@ -46,8 +47,8 @@ class _MessagesScreenState extends State<MessagesScreen> {
               Text(
                 strings.messages,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               IconButton(
                 icon: const Icon(Icons.refresh),
@@ -92,16 +93,20 @@ class _MessagesScreenState extends State<MessagesScreen> {
           Text(
             strings.noMessages,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
-                ),
+              fontWeight: FontWeight.bold,
+              color: isDark
+                  ? AppColors.darkTextPrimary
+                  : AppColors.lightTextPrimary,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             strings.inboxEmpty,
-             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
-                ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.lightTextSecondary,
+            ),
           ),
         ],
       ),
@@ -131,7 +136,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
               'Now',
               style: TextStyle(
                 fontSize: 12,
-                color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                color: isDark
+                    ? AppColors.darkTextTertiary
+                    : AppColors.lightTextTertiary,
               ),
             ),
           ),
@@ -140,5 +147,3 @@ class _MessagesScreenState extends State<MessagesScreen> {
     );
   }
 }
-
-

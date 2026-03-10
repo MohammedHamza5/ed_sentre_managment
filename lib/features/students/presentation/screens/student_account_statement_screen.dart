@@ -473,6 +473,7 @@ class _StudentAccountStatementScreenState
         filename: 'statement_${widget.studentId}.pdf',
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('فشل التصدير: $e')));
@@ -662,5 +663,3 @@ class _StudentAccountStatementScreenState
     return pdf;
   }
 }
-
-

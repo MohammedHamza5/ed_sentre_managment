@@ -140,6 +140,7 @@ class _TeacherSalariesScreenState extends State<TeacherSalariesScreen> {
         ),
       ),
     );
+    if (!mounted) return;
     _loadHistory(); // Refresh after return
   }
 
@@ -214,7 +215,9 @@ class _TeacherSalariesScreenState extends State<TeacherSalariesScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.r),
                     side: BorderSide(
-                      color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+                      color: isDark
+                          ? Colors.grey.shade700
+                          : Colors.grey.shade300,
                     ),
                   ),
                   child: ListTile(
@@ -222,12 +225,16 @@ class _TeacherSalariesScreenState extends State<TeacherSalariesScreen> {
                         _navigateToInvoice(item['month'], item['year']),
                     leading: CircleAvatar(
                       backgroundColor: isPaid
-                          ? (isDark ? Colors.green.shade900 : Colors.green.shade100)
-                          : (isDark ? Colors.orange.shade900 : Colors.orange.shade100),
+                          ? (isDark
+                                ? Colors.green.shade900
+                                : Colors.green.shade100)
+                          : (isDark
+                                ? Colors.orange.shade900
+                                : Colors.orange.shade100),
                       child: Icon(
                         isPaid ? Icons.check : Icons.access_time_filled,
-                        color: isPaid 
-                            ? (isDark ? Colors.green.shade300 : Colors.green) 
+                        color: isPaid
+                            ? (isDark ? Colors.green.shade300 : Colors.green)
                             : (isDark ? Colors.orange.shade300 : Colors.orange),
                       ),
                     ),
@@ -246,5 +253,3 @@ class _TeacherSalariesScreenState extends State<TeacherSalariesScreen> {
     );
   }
 }
-
-

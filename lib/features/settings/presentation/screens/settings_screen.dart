@@ -24,7 +24,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../shared/models/billing_models.dart';
 import '../../../../core/offline/local_cache_service.dart';
 
-
 /// شاشة الإعدادات
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -323,7 +322,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         if (_isLoading)
           Container(
             color: Colors.black.withValues(alpha: 0.5),
-            child:  Center(
+            child: Center(
               child: Card(
                 child: Padding(
                   padding: EdgeInsets.all(24.0.w),
@@ -378,12 +377,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-
   Widget _buildRolesSection(bool isDark, AppStrings strings) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-         Text(
+        Text(
           'الأدوار والصلاحيات',
           style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
         ),
@@ -410,12 +408,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             if (centerProvider.hasCenter)
               Card(...)
             */
-
             SizedBox(height: AppSpacing.xl.h),
 
-
             // نظام التسعير متاح في قسم "جدول الأسعار" و "نظام الدفع"
-
             _buildTextField(
               strings.centerName,
               _centerNameController,
@@ -467,7 +462,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Consumer<CenterProvider>(
       builder: (context, centerProvider, child) {
         final config = centerProvider.billingConfig;
-        
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -487,7 +482,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             // نوع الدفع الأساسي
             Card(
-              color: isDark ? AppColors.darkSurfaceVariant : AppColors.lightSurfaceVariant,
+              color: isDark
+                  ? AppColors.darkSurfaceVariant
+                  : AppColors.lightSurfaceVariant,
               child: Padding(
                 padding: EdgeInsets.all(AppSpacing.lg.w),
                 child: Column(
@@ -499,12 +496,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         SizedBox(width: 8.w),
                         Text(
                           'نوع الدفع الأساسي',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.sp,
+                          ),
                         ),
                       ],
                     ),
                     SizedBox(height: AppSpacing.lg.h),
-                    
+
                     // اختيارات نوع الدفع
                     Wrap(
                       spacing: 12.w,
@@ -551,9 +551,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             SizedBox(height: AppSpacing.lg.h),
 
             // إعدادات إضافية للنظام الشهري
-            if (config.billingType == BillingType.monthly || config.billingType == BillingType.mixed)
+            if (config.billingType == BillingType.monthly ||
+                config.billingType == BillingType.mixed)
               Card(
-                color: isDark ? AppColors.darkSurfaceVariant : AppColors.lightSurfaceVariant,
+                color: isDark
+                    ? AppColors.darkSurfaceVariant
+                    : AppColors.lightSurfaceVariant,
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   child: Column(
@@ -563,30 +566,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         children: [
                           Icon(Icons.calendar_today, color: Colors.blue),
                           const SizedBox(width: 8),
-                           Text(
+                          Text(
                             'نوع الحساب الشهري',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.sp,
+                            ),
                           ),
                         ],
                       ),
                       SizedBox(height: AppSpacing.md.h),
-                      
+
                       RadioListTile<MonthlyPaymentMode>(
                         title: const Text('كل شهر كامل (30 يوم)'),
-                        subtitle: const Text('الطالب يدفع كل شهر بغض النظر عن عدد الحصص'),
+                        subtitle: const Text(
+                          'الطالب يدفع كل شهر بغض النظر عن عدد الحصص',
+                        ),
                         value: MonthlyPaymentMode.calendarMonth,
                         groupValue: config.monthlyPaymentMode,
                         onChanged: (val) => _updateMonthlyMode(val!),
                       ),
                       RadioListTile<MonthlyPaymentMode>(
                         title: Text('كل ${config.sessionsPerCycle} حصص'),
-                        subtitle: const Text('الطالب يدفع عند إكمال عدد معين من الحصص'),
+                        subtitle: const Text(
+                          'الطالب يدفع عند إكمال عدد معين من الحصص',
+                        ),
                         value: MonthlyPaymentMode.sessionCount,
                         groupValue: config.monthlyPaymentMode,
                         onChanged: (val) => _updateMonthlyMode(val!),
                       ),
-                      
-                      if (config.monthlyPaymentMode == MonthlyPaymentMode.sessionCount)
+
+                      if (config.monthlyPaymentMode ==
+                          MonthlyPaymentMode.sessionCount)
                         Padding(
                           padding: EdgeInsets.only(right: 48.w, top: 8.h),
                           child: Row(
@@ -595,11 +606,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               SizedBox(width: 12.w),
                               DropdownButton<int>(
                                 value: config.sessionsPerCycle,
-                                items: [4, 6, 8, 10, 12].map((n) => DropdownMenuItem(
-                                  value: n,
-                                  child: Text('$n حصص'),
-                                )).toList(),
-                                onChanged: (val) => _updateSessionsPerCycle(val!),
+                                items: [4, 6, 8, 10, 12]
+                                    .map(
+                                      (n) => DropdownMenuItem(
+                                        value: n,
+                                        child: Text('$n حصص'),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (val) =>
+                                    _updateSessionsPerCycle(val!),
                               ),
                             ],
                           ),
@@ -612,7 +628,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             // إعدادات المهلة والدين
             Card(
-              color: isDark ? AppColors.darkSurfaceVariant : AppColors.lightSurfaceVariant,
+              color: isDark
+                  ? AppColors.darkSurfaceVariant
+                  : AppColors.lightSurfaceVariant,
               child: Padding(
                 padding: EdgeInsets.all(AppSpacing.lg.w),
                 child: Column(
@@ -622,14 +640,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       children: [
                         Icon(Icons.timer, color: Colors.orange),
                         const SizedBox(width: 8),
-                         Text(
+                        Text(
                           'إعدادات المهلة والدين',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.sp,
+                          ),
                         ),
                       ],
                     ),
                     SizedBox(height: AppSpacing.lg.h),
-                    
+
                     Row(
                       children: [
                         Expanded(
@@ -639,15 +660,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               const Text('مهلة الحصص المجانية'),
                               Text(
                                 'عدد الحصص المسموحة بدون دفع قبل التحذير',
-                                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
                               ),
                               const SizedBox(height: 8),
                               DropdownButton<int>(
                                 value: config.graceSessions,
-                                items: [1, 2, 3, 4, 5].map((n) => DropdownMenuItem(
-                                  value: n,
-                                  child: Text('$n حصص'),
-                                )).toList(),
+                                items: [1, 2, 3, 4, 5]
+                                    .map(
+                                      (n) => DropdownMenuItem(
+                                        value: n,
+                                        child: Text('$n حصص'),
+                                      ),
+                                    )
+                                    .toList(),
                                 onChanged: (val) => _updateGraceSessions(val!),
                               ),
                             ],
@@ -661,16 +689,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               const Text('الحد الأقصى للدين'),
                               Text(
                                 'عدد الحصص قبل منع الحضور',
-                                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
                               ),
                               const SizedBox(height: 8),
                               DropdownButton<int>(
                                 value: config.maxDebtSessions,
-                                items: [2, 3, 4, 5, 6, 8, 10].map((n) => DropdownMenuItem(
-                                  value: n,
-                                  child: Text('$n حصص'),
-                                )).toList(),
-                                onChanged: (val) => _updateMaxDebtSessions(val!),
+                                items: [2, 3, 4, 5, 6, 8, 10]
+                                    .map(
+                                      (n) => DropdownMenuItem(
+                                        value: n,
+                                        child: Text('$n حصص'),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (val) =>
+                                    _updateMaxDebtSessions(val!),
                               ),
                             ],
                           ),
@@ -689,7 +725,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               decoration: BoxDecoration(
                 color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.3),
+                ),
               ),
               child: Row(
                 children: [
@@ -709,11 +747,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         if (config.isMonthly)
                           Text(
                             config.monthlyModeArabic,
-                            style: TextStyle(fontSize: 13.sp, color: AppColors.primary),
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              color: AppColors.primary,
+                            ),
                           ),
                         Text(
                           'المهلة: ${config.graceSessions} حصص | الحد الأقصى للدين: ${config.maxDebtSessions} حصص',
-                          style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.grey[600],
+                          ),
                         ),
                       ],
                     ),
@@ -796,7 +840,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 12),
               _buildPriceFeature('🎯', 'السعر = المادة + المدرس + المرحلة'),
               _buildPriceFeature('📊', 'كل مدرس يمكن أن يكون بسعر مختلف'),
-              _buildPriceFeature('📚', 'كل مرحلة دراسية يمكن أن تكون بسعر مختلف'),
+              _buildPriceFeature(
+                '📚',
+                'كل مرحلة دراسية يمكن أن تكون بسعر مختلف',
+              ),
               _buildPriceFeature('⚡', 'النظام يبحث تلقائياً عن أنسب سعر'),
             ],
           ),
@@ -807,7 +854,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Container(
           padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
-            color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.withValues(alpha: 0.05),
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.grey.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12.r),
           ),
           child: Column(
@@ -819,15 +868,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const SizedBox(height: 8),
               Table(
-                border: TableBorder.all(color: Colors.grey.withValues(alpha: 0.3)),
+                border: TableBorder.all(
+                  color: Colors.grey.withValues(alpha: 0.3),
+                ),
                 children: [
                   const TableRow(
                     decoration: BoxDecoration(color: Color(0x1010B981)),
                     children: [
-                      Padding(padding: EdgeInsets.all(8), child: Text('المادة', style: TextStyle(fontWeight: FontWeight.bold))),
-                      Padding(padding: EdgeInsets.all(8), child: Text('المدرس', style: TextStyle(fontWeight: FontWeight.bold))),
-                      Padding(padding: EdgeInsets.all(8), child: Text('المرحلة', style: TextStyle(fontWeight: FontWeight.bold))),
-                      Padding(padding: EdgeInsets.all(8), child: Text('الحصة', style: TextStyle(fontWeight: FontWeight.bold))),
+                      Padding(
+                        padding: EdgeInsets.all(8),
+                        child: Text(
+                          'المادة',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(8),
+                        child: Text(
+                          'المدرس',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(8),
+                        child: Text(
+                          'المرحلة',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(8),
+                        child: Text(
+                          'الحصة',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
                     ],
                   ),
                   _buildExampleRow('رياضيات', 'أ/ محمد', 'ثالثة ثانوي', '70 ج'),
@@ -855,13 +930,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  TableRow _buildExampleRow(String subject, String teacher, String grade, String price) {
+  TableRow _buildExampleRow(
+    String subject,
+    String teacher,
+    String grade,
+    String price,
+  ) {
     return TableRow(
       children: [
         Padding(padding: EdgeInsets.all(8.w), child: Text(subject)),
         Padding(padding: EdgeInsets.all(8.w), child: Text(teacher)),
         Padding(padding: EdgeInsets.all(8.w), child: Text(grade)),
-        Padding(padding: EdgeInsets.all(8.w), child: Text(price, style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold))),
+        Padding(
+          padding: EdgeInsets.all(8.w),
+          child: Text(
+            price,
+            style: const TextStyle(
+              color: Colors.green,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -881,9 +970,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         duration: const Duration(milliseconds: 200),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         decoration: BoxDecoration(
-          color: isSelected 
-              ? AppColors.primary.withValues(alpha: 0.15) 
-              : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.withValues(alpha: 0.1)),
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.15)
+              : (isDark
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.grey.withValues(alpha: 0.1)),
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: isSelected ? AppColors.primary : Colors.transparent,
@@ -894,7 +985,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             Icon(
               icon,
-              color: isSelected ? AppColors.primary : (isDark ? Colors.white70 : Colors.grey[600]),
+              color: isSelected
+                  ? AppColors.primary
+                  : (isDark ? Colors.white70 : Colors.grey[600]),
               size: 28.sp,
             ),
             SizedBox(height: 8.h),
@@ -921,10 +1014,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _updateBillingType(BillingType type) async {
     final centerProvider = context.read<CenterProvider>();
     final currentType = centerProvider.billingConfig.billingType;
-    
+
     // إذا كان نفس النوع، لا تفعل شيء
     if (currentType == type) return;
-    
+
     // إظهار Dialog تحذيري قوي
     final confirmed = await showDialog<bool>(
       context: context,
@@ -943,7 +1036,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 color: Colors.red.shade100,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.warning_amber_rounded, color: Colors.red.shade700, size: 32.sp),
+              child: Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.red.shade700,
+                size: 32.sp,
+              ),
             ),
             SizedBox(width: 12.w),
             Expanded(
@@ -970,7 +1067,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.swap_horiz, color: Colors.red.shade700, size: 28.sp),
+                  Icon(
+                    Icons.swap_horiz,
+                    color: Colors.red.shade700,
+                    size: 28.sp,
+                  ),
                   SizedBox(width: 12.w),
                   Expanded(
                     child: Text(
@@ -1051,25 +1152,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
               backgroundColor: Colors.red.shade600,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             onPressed: () => Navigator.pop(context, true),
             icon: const Icon(Icons.check_circle),
-            label: const Text('نعم، غيّر النظام', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            label: const Text(
+              'نعم، غيّر النظام',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
     );
-    
+
     if (confirmed != true) return;
-    
+
     // تنفيذ التغيير
     final newConfig = centerProvider.billingConfig.copyWith(billingType: type);
     final success = await centerProvider.updateBillingConfig(newConfig);
     if (mounted && success) {
       // ⚡ إعادة بناء الـ UI لعرض النظام الجديد
       setState(() {});
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
@@ -1093,7 +1199,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           Text(emoji, style: TextStyle(fontSize: 18.sp)),
           SizedBox(width: 12.w),
-          Expanded(child: Text(text, style: TextStyle(fontSize: 14.sp))),
+          Expanded(
+            child: Text(text, style: TextStyle(fontSize: 14.sp)),
+          ),
         ],
       ),
     );
@@ -1101,34 +1209,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   String _getBillingTypeArabic(BillingType type) {
     switch (type) {
-      case BillingType.monthly: return 'شهري';
-      case BillingType.perSession: return 'بالحصة';
-      case BillingType.mixed: return 'مختلط';
-      case BillingType.disabled: return 'معطّل';
+      case BillingType.monthly:
+        return 'شهري';
+      case BillingType.perSession:
+        return 'بالحصة';
+      case BillingType.mixed:
+        return 'مختلط';
+      case BillingType.disabled:
+        return 'معطّل';
     }
   }
 
   Future<void> _updateMonthlyMode(MonthlyPaymentMode mode) async {
     final centerProvider = context.read<CenterProvider>();
-    final newConfig = centerProvider.billingConfig.copyWith(monthlyPaymentMode: mode);
+    final newConfig = centerProvider.billingConfig.copyWith(
+      monthlyPaymentMode: mode,
+    );
     await centerProvider.updateBillingConfig(newConfig);
   }
 
   Future<void> _updateSessionsPerCycle(int count) async {
     final centerProvider = context.read<CenterProvider>();
-    final newConfig = centerProvider.billingConfig.copyWith(sessionsPerCycle: count);
+    final newConfig = centerProvider.billingConfig.copyWith(
+      sessionsPerCycle: count,
+    );
     await centerProvider.updateBillingConfig(newConfig);
   }
 
   Future<void> _updateGraceSessions(int count) async {
     final centerProvider = context.read<CenterProvider>();
-    final newConfig = centerProvider.billingConfig.copyWith(graceSessions: count);
+    final newConfig = centerProvider.billingConfig.copyWith(
+      graceSessions: count,
+    );
     await centerProvider.updateBillingConfig(newConfig);
   }
 
   Future<void> _updateMaxDebtSessions(int count) async {
     final centerProvider = context.read<CenterProvider>();
-    final newConfig = centerProvider.billingConfig.copyWith(maxDebtSessions: count);
+    final newConfig = centerProvider.billingConfig.copyWith(
+      maxDebtSessions: count,
+    );
     await centerProvider.updateBillingConfig(newConfig);
   }
 
@@ -1362,12 +1482,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           subtitle: const Text('الخروج من حسابك'),
           onTap: _logout,
         ),
-        
+
         const SizedBox(height: AppSpacing.xxl),
         Text(
           "المنطقة الخطرة",
           style: TextStyle(
-            fontSize: 18.sp, 
+            fontSize: 18.sp,
             fontWeight: FontWeight.bold,
             color: AppColors.error,
           ),
@@ -1511,16 +1631,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
         licenseNumber: _licenseController.text.trim(),
       );
 
+      if (!mounted) return;
+
       if (success) {
         setState(() => _hasChanges = false);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(strings.settingsSaved),
-              backgroundColor: AppColors.success,
-            ),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(strings.settingsSaved),
+            backgroundColor: AppColors.success,
+          ),
+        );
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -1843,7 +1963,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Icons.delete_forever_rounded,
               color: AppColors.error,
             ),
-            title:  Text(
+            title: Text(
               "مسح بيانات التطبيق المخزنة",
               style: TextStyle(
                 color: AppColors.error,
@@ -1906,7 +2026,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _handleAppReset() async {
     setState(() => _isLoading = true);
-    
+
     try {
       // 1. Clear SharedPreferences
       final prefs = await SharedPreferences.getInstance();
@@ -1916,10 +2036,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       // 2. Delete SQLite Database (Drift)
       try {
         final dbFolder = await getApplicationDocumentsDirectory();
-        
+
         // Potential DB filenames
         final filesToDelete = ['ed_sentre.sqlite', 'db.sqlite'];
-        
+
         for (final fileName in filesToDelete) {
           final file = File(p.join(dbFolder.path, fileName));
           if (await file.exists()) {
@@ -1963,7 +2083,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         // Force hard navigation to ensure providers are reset if possible
         // Ideally, we should restart the app, but navigation to login is the standard "soft" reset.
         context.go('/login');
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('تمت إعادة ضبط التطبيق بنجاح'),
@@ -2158,15 +2278,23 @@ class _UsersListWidgetState extends State<_UsersListWidget> {
                   final tempPassword =
                       'Ed${cleanPhone.substring(cleanPhone.length - 4)}${DateTime.now().millisecond}'; // e.g., Ed5678123
 
-                  debugPrint('🔐 ══════════════════════════════════════════════');
+                  debugPrint(
+                    '🔐 ══════════════════════════════════════════════',
+                  );
                   debugPrint('🔐 [AddUser] Starting user creation...');
                   debugPrint('🔐 [AddUser] Smart Email: $smartEmail');
                   debugPrint('🔐 [AddUser] Target Center ID: $centerId');
-                  debugPrint('🔐 [AddUser] Current Admin UID: ${SupabaseClientManager.client.auth.currentUser?.id}');
-                  debugPrint('🔐 ══════════════════════════════════════════════');
+                  debugPrint(
+                    '🔐 [AddUser] Current Admin UID: ${SupabaseClientManager.client.auth.currentUser?.id}',
+                  );
+                  debugPrint(
+                    '🔐 ══════════════════════════════════════════════',
+                  );
 
                   // 2. Create User using Temporary Client (to avoid logging out Admin)
-                  debugPrint('🔐 [AddUser] Step 1: Creating temp Supabase client...');
+                  debugPrint(
+                    '🔐 [AddUser] Step 1: Creating temp Supabase client...',
+                  );
                   final tempClient = SupabaseClient(
                     SupabaseConfig.url,
                     SupabaseConfig.anonKey,
@@ -2188,50 +2316,64 @@ class _UsersListWidgetState extends State<_UsersListWidget> {
                   );
 
                   if (authResponse.user == null) {
-                    debugPrint('🔴 [AddUser] Step 2 FAILED: authResponse.user is null');
+                    debugPrint(
+                      '🔴 [AddUser] Step 2 FAILED: authResponse.user is null',
+                    );
                     throw Exception('Auth creation failed');
                   }
-                  
+
                   debugPrint('🟢 [AddUser] Step 2 SUCCESS: Auth user created');
-                  debugPrint('🔐 [AddUser] New User ID: ${authResponse.user!.id}');
-                  debugPrint('🔐 [AddUser] Admin UID (should be unchanged): ${SupabaseClientManager.client.auth.currentUser?.id}');
+                  debugPrint(
+                    '🔐 [AddUser] New User ID: ${authResponse.user!.id}',
+                  );
+                  debugPrint(
+                    '🔐 [AddUser] Admin UID (should be unchanged): ${SupabaseClientManager.client.auth.currentUser?.id}',
+                  );
 
                   // 3. Upsert into public.users via RPC (bypasses RLS)
-                  debugPrint('🔐 [AddUser] Step 3: Calling admin_upsert_user RPC...');
+                  debugPrint(
+                    '🔐 [AddUser] Step 3: Calling admin_upsert_user RPC...',
+                  );
                   debugPrint('🔐 [AddUser] RPC params:');
                   debugPrint('   - p_user_id: ${authResponse.user!.id}');
                   debugPrint('   - p_full_name: ${nameController.text.trim()}');
                   debugPrint('   - p_phone: $phone');
                   debugPrint('   - p_role: $role');
                   debugPrint('   - p_center_id: $centerId');
-                  
+
                   try {
-                    await SupabaseClientManager.client.rpc('admin_upsert_user', params: {
-                      'p_user_id': authResponse.user!.id,
-                      'p_full_name': nameController.text.trim(),
-                      'p_phone': phone,
-                      'p_role': role,
-                      'p_center_id': centerId,
-                    });
-                    debugPrint('🟢 [AddUser] Step 3 SUCCESS: User inserted via RPC');
+                    await SupabaseClientManager.client.rpc(
+                      'admin_upsert_user',
+                      params: {
+                        'p_user_id': authResponse.user!.id,
+                        'p_full_name': nameController.text.trim(),
+                        'p_phone': phone,
+                        'p_role': role,
+                        'p_center_id': centerId,
+                      },
+                    );
+                    debugPrint(
+                      '🟢 [AddUser] Step 3 SUCCESS: User inserted via RPC',
+                    );
                   } catch (rpcError) {
                     debugPrint('🔴 [AddUser] Step 3 FAILED (RPC): $rpcError');
                     rethrow;
                   }
 
-
                   debugPrint('🟢 User created successfully');
-                  debugPrint('🔐 ══════════════════════════════════════════════');
+                  debugPrint(
+                    '🔐 ══════════════════════════════════════════════',
+                  );
 
                   // Save values before Navigator.pop closes dialog
                   final savedName = nameController.text.trim();
                   final savedPhone = phone;
                   final savedPassword = tempPassword;
                   final savedRole = role;
-                  
+
                   // Close the add user dialog first
                   if (mounted) Navigator.of(context).pop();
-                  
+
                   // Refresh users list
                   _fetchUsers();
 
@@ -2240,7 +2382,7 @@ class _UsersListWidgetState extends State<_UsersListWidget> {
                     await Future.delayed(const Duration(milliseconds: 100));
                     if (mounted) {
                       showDialog(
-                        context: this.context,  // Use widget's context
+                        context: this.context, // Use widget's context
                         barrierDismissible: false,
                         builder: (dialogContext) => AccessCardDialog(
                           userName: savedName,
@@ -2251,11 +2393,14 @@ class _UsersListWidgetState extends State<_UsersListWidget> {
                       );
                     }
                   }
-
                 } catch (e) {
-                  debugPrint('🔴 ══════════════════════════════════════════════');
+                  debugPrint(
+                    '🔴 ══════════════════════════════════════════════',
+                  );
                   debugPrint('🔴 Creation failed: $e');
-                  debugPrint('🔴 ══════════════════════════════════════════════');
+                  debugPrint(
+                    '🔴 ══════════════════════════════════════════════',
+                  );
                   if (mounted) {
                     scaffoldMessenger.showSnackBar(
                       SnackBar(
@@ -2265,7 +2410,6 @@ class _UsersListWidgetState extends State<_UsersListWidget> {
                     );
                     setState(() => _isLoading = false);
                   }
-
                 }
               }
             },
@@ -2311,12 +2455,15 @@ class _UsersListWidgetState extends State<_UsersListWidget> {
         SizedBox(height: AppSpacing.md.h),
         Text(
           'إدارة المديريين والموظفين في السنتر.',
-          style: TextStyle(color: AppColors.lightTextSecondary, fontSize: 13.sp),
+          style: TextStyle(
+            color: AppColors.lightTextSecondary,
+            fontSize: 13.sp,
+          ),
         ),
         SizedBox(height: AppSpacing.xl.h),
 
         if (_isLoading)
-           Center(
+          Center(
             child: Padding(
               padding: EdgeInsets.all(AppSpacing.xl.w),
               child: CircularProgressIndicator(),
@@ -2326,11 +2473,7 @@ class _UsersListWidgetState extends State<_UsersListWidget> {
           Center(
             child: Column(
               children: [
-                 Icon(
-                  Icons.error_outline,
-                  size: 48.sp,
-                  color: AppColors.error,
-                ),
+                Icon(Icons.error_outline, size: 48.sp, color: AppColors.error),
                 SizedBox(height: AppSpacing.md.h),
                 Text('حدث خطأ: $_error'),
                 const SizedBox(height: AppSpacing.md),
@@ -2348,7 +2491,11 @@ class _UsersListWidgetState extends State<_UsersListWidget> {
               padding: EdgeInsets.all(AppSpacing.xl.w),
               child: Column(
                 children: [
-                  Icon(Icons.people_outline, size: 48.sp, color: Colors.grey[400]),
+                  Icon(
+                    Icons.people_outline,
+                    size: 48.sp,
+                    color: Colors.grey[400],
+                  ),
                   SizedBox(height: AppSpacing.md.h),
                   Text(
                     'لا يوجد مستخدمين',
@@ -2484,5 +2631,3 @@ class _UsersListWidgetState extends State<_UsersListWidget> {
     );
   }
 }
-
-

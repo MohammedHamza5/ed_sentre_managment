@@ -69,19 +69,23 @@ class _InfiniteListViewState<T> extends State<InfiniteListView<T>> {
 
     try {
       final newItems = await widget.loadData(1, widget.pageSize);
+      if (!mounted) return;
       setState(() {
         _items = newItems;
         _currentPage = 1;
         _hasMore = newItems.length == widget.pageSize;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = e.toString();
       });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -96,19 +100,23 @@ class _InfiniteListViewState<T> extends State<InfiniteListView<T>> {
       final nextPage = _currentPage + 1;
       final newItems = await widget.loadData(nextPage, widget.pageSize);
 
+      if (!mounted) return;
       setState(() {
         _items.addAll(newItems);
         _currentPage = nextPage;
         _hasMore = newItems.length == widget.pageSize;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = e.toString();
       });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -189,5 +197,3 @@ class _InfiniteListViewState<T> extends State<InfiniteListView<T>> {
     );
   }
 }
-
-

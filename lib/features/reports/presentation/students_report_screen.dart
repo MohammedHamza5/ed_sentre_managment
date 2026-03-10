@@ -20,7 +20,7 @@ class StudentsReportScreen extends StatefulWidget {
 
 class _StudentsReportScreenState extends State<StudentsReportScreen> {
   final _reportsRepo = ReportsRepository();
-  
+
   bool _isLoading = false;
   List<Student> _students = [];
   String? _errorMessage;
@@ -57,11 +57,15 @@ class _StudentsReportScreenState extends State<StudentsReportScreen> {
         searchQuery: _searchQuery.isEmpty ? null : _searchQuery,
       );
 
+      if (!mounted) return;
+
       setState(() {
         _students = students;
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
+
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;
@@ -71,22 +75,26 @@ class _StudentsReportScreenState extends State<StudentsReportScreen> {
 
   Future<void> _exportReport() async {
     if (_students.isEmpty) {
-       ScaffoldMessenger.of(context).showSnackBar(
-         const SnackBar(content: Text('لا توجد بيانات للتصدير')),
-       );
-       return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('لا توجد بيانات للتصدير')));
+      return;
     }
 
     try {
-      final pdfBytes = await ReportExportService.generateStudentListPdf(_students);
+      final pdfBytes = await ReportExportService.generateStudentListPdf(
+        _students,
+      );
       await Printing.sharePdf(
         bytes: pdfBytes,
-        filename: 'students_report_${DateTime.now().millisecondsSinceEpoch}.pdf',
+        filename:
+            'students_report_${DateTime.now().millisecondsSinceEpoch}.pdf',
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('فشل التصدير: $e')),
-      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('فشل التصدير: $e')));
     }
   }
 
@@ -253,13 +261,21 @@ class _StudentsReportScreenState extends State<StudentsReportScreen> {
                     items: const [
                       DropdownMenuItem(value: null, child: Text('الكل')),
                       DropdownMenuItem(
-                          value: StudentStatus.active, child: Text('نشط')),
+                        value: StudentStatus.active,
+                        child: Text('نشط'),
+                      ),
                       DropdownMenuItem(
-                          value: StudentStatus.inactive, child: Text('غير نشط')),
+                        value: StudentStatus.inactive,
+                        child: Text('غير نشط'),
+                      ),
                       DropdownMenuItem(
-                          value: StudentStatus.suspended, child: Text('موقوف')),
+                        value: StudentStatus.suspended,
+                        child: Text('موقوف'),
+                      ),
                       DropdownMenuItem(
-                          value: StudentStatus.overdue, child: Text('متأخر')),
+                        value: StudentStatus.overdue,
+                        child: Text('متأخر'),
+                      ),
                     ],
                     onChanged: (value) {
                       setState(() => _selectedStatus = value);
@@ -276,8 +292,12 @@ class _StudentsReportScreenState extends State<StudentsReportScreen> {
   }
 
   Widget _buildStatisticsCard() {
-    final activeCount = _students.where((s) => s.status == StudentStatus.active).length;
-    final inactiveCount = _students.where((s) => s.status == StudentStatus.inactive).length;
+    final activeCount = _students
+        .where((s) => s.status == StudentStatus.active)
+        .length;
+    final inactiveCount = _students
+        .where((s) => s.status == StudentStatus.inactive)
+        .length;
 
     return Card(
       elevation: 0,
@@ -361,13 +381,7 @@ class _StudentsReportScreenState extends State<StudentsReportScreen> {
               color: color,
             ),
           ),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: color,
-            ),
-          ),
+          Text(label, style: TextStyle(fontSize: 12, color: color)),
         ],
       ),
     );
@@ -379,10 +393,7 @@ class _StudentsReportScreenState extends State<StudentsReportScreen> {
       children: [
         Text(
           'قائمة الطلاب (${_students.length})',
-          style: GoogleFonts.cairo(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: GoogleFonts.cairo(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
 
@@ -391,7 +402,9 @@ class _StudentsReportScreenState extends State<StudentsReportScreen> {
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: _getStatusColor(student.status).withValues(alpha: 0.1),
+                backgroundColor: _getStatusColor(
+                  student.status,
+                ).withValues(alpha: 0.1),
                 child: Text(
                   _getInitials(student.name),
                   style: TextStyle(
@@ -406,7 +419,10 @@ class _StudentsReportScreenState extends State<StudentsReportScreen> {
               ),
               subtitle: Text(student.gradeLevel ?? 'غير محدد'),
               trailing: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: _getStatusColor(student.status).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -434,11 +450,7 @@ class _StudentsReportScreenState extends State<StudentsReportScreen> {
         child: Center(
           child: Column(
             children: [
-              Icon(
-                Icons.inbox_rounded,
-                size: 64,
-                color: Colors.grey.shade400,
-              ),
+              Icon(Icons.inbox_rounded, size: 64, color: Colors.grey.shade400),
               const SizedBox(height: 16),
               Text(
                 'لا توجد بيانات',
@@ -467,7 +479,11 @@ class _StudentsReportScreenState extends State<StudentsReportScreen> {
         child: Center(
           child: Column(
             children: [
-              Icon(Icons.error_outline_rounded, size: 64, color: Colors.red.shade300),
+              Icon(
+                Icons.error_outline_rounded,
+                size: 64,
+                color: Colors.red.shade300,
+              ),
               const SizedBox(height: 16),
               Text(
                 'حدث خطأ',
@@ -528,5 +544,3 @@ class _StudentsReportScreenState extends State<StudentsReportScreen> {
     }
   }
 }
-
-

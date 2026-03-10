@@ -69,12 +69,14 @@ class _SmartInvoiceScreenState extends State<SmartInvoiceScreen> {
 
       final balance = await _repository.getStudentBalance(widget.studentId);
 
+      if (!mounted) return;
       setState(() {
         _invoice = invoice;
         _balance = balance;
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _isLoading = false;

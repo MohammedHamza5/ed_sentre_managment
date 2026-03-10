@@ -212,7 +212,9 @@ class _CoursePricesScreenState extends State<CoursePricesScreen> {
                       ),
                       Text(
                         '${_prices.length} سعر | ${groupedPrices.length} مادة',
-                        style: TextStyle(color: Colors.white.withValues(alpha: 0.9)),
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.9),
+                        ),
                       ),
                     ],
                   ),
@@ -358,11 +360,13 @@ class _CoursePricesScreenState extends State<CoursePricesScreen> {
   }) {
     // التأكد من أن القيمة موجودة في القائمة
     final subjectNames = _subjects.map((s) => s.name).toList();
-    String? selectedSubjectName = existingPrice?.subjectName ?? preselectedSubject;
-    if (selectedSubjectName != null && !subjectNames.contains(selectedSubjectName)) {
+    String? selectedSubjectName =
+        existingPrice?.subjectName ?? preselectedSubject;
+    if (selectedSubjectName != null &&
+        !subjectNames.contains(selectedSubjectName)) {
       selectedSubjectName = null; // إعادة تعيين إذا لم تكن موجودة
     }
-    
+
     final sessionPriceController = TextEditingController(
       text: existingPrice?.sessionPrice.toStringAsFixed(0) ?? '',
     );
@@ -376,9 +380,10 @@ class _CoursePricesScreenState extends State<CoursePricesScreen> {
     String? selectedGradeLevel = existingPrice?.gradeLevel;
 
     final gradeLevels = ['أولى ثانوي', 'ثانية ثانوي', 'ثالثة ثانوي'];
-    
+
     // التأكد من أن المرحلة موجودة في القائمة
-    if (selectedGradeLevel != null && !gradeLevels.contains(selectedGradeLevel)) {
+    if (selectedGradeLevel != null &&
+        !gradeLevels.contains(selectedGradeLevel)) {
       selectedGradeLevel = null;
     }
 
@@ -436,7 +441,13 @@ class _CoursePricesScreenState extends State<CoursePricesScreen> {
                               .toList();
 
                     return DropdownButtonFormField<String?>(
-                      value: selectedTeacherId,
+                      value:
+                          (selectedTeacherId == null ||
+                              filteredTeachers.any(
+                                (t) => t.id == selectedTeacherId,
+                              ))
+                          ? selectedTeacherId
+                          : null,
                       decoration: InputDecoration(
                         labelText:
                             filteredTeachers.isEmpty &&
@@ -542,7 +553,9 @@ class _CoursePricesScreenState extends State<CoursePricesScreen> {
                   decoration: BoxDecoration(
                     color: Colors.green.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: Colors.green.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Column(
                     children: [
@@ -767,6 +780,7 @@ class _CoursePricesScreenState extends State<CoursePricesScreen> {
                         );
                       }
                     } catch (e) {
+                      if (!mounted) return;
                       ScaffoldMessenger.of(
                         context,
                       ).showSnackBar(SnackBar(content: Text('خطأ: $e')));
@@ -918,5 +932,3 @@ class _CoursePricesScreenState extends State<CoursePricesScreen> {
     );
   }
 }
-
-

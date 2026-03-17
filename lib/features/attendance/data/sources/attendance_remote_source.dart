@@ -134,8 +134,9 @@ class AttendanceRemoteSource {
           .from('attendance')
           .select('''
             *,
-            students(name),
-            schedules(subject_id, subjects(name))
+            students(full_name),
+            lessons(title, subject_id, subjects(name)),
+            groups(group_name, course_id, courses(name))
           ''')
           .eq('center_id', centerId)
           .order('date', ascending: false)
@@ -162,8 +163,9 @@ class AttendanceRemoteSource {
           .from('attendance')
           .select('''
             *,
-            students(name),
-            schedules(subject_id, subjects(name))
+            students(full_name),
+            lessons(title, subject_id, subjects(name)),
+            groups(group_name, course_id, courses(name))
           ''')
           .eq('center_id', centerId)
           .eq('date', dateStr);
@@ -194,8 +196,9 @@ class AttendanceRemoteSource {
           .from('attendance')
           .select('''
             *,
-            students(name),
-            schedules(subject_id, subjects(name))
+            students(full_name),
+            lessons(title, subject_id, subjects(name)),
+            groups(group_name, course_id, courses(name))
           ''')
           .eq('center_id', centerId)
           .gte('date', startStr)

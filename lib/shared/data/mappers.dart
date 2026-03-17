@@ -309,8 +309,19 @@ class AttendanceMapper {
       studentId: (a['student_id'] ?? '').toString(),
       studentName: (a['students']?['full_name'] ?? a['student_name'] ?? '')
           .toString(),
-      sessionId: (a['schedule_id'] ?? a['session_id'])?.toString(),
-      sessionName: (a['schedules']?['name'] ?? a['session_name'])?.toString(),
+      sessionId:
+          (a['schedule_id'] ??
+                  a['session_id'] ??
+                  a['lesson_id'] ??
+                  a['group_id'])
+              ?.toString(),
+      sessionName:
+          (a['schedules']?['name'] ??
+                  a['session_name'] ??
+                  a['lessons']?['title'] ??
+                  a['groups']?['group_name'] ??
+                  a['groups']?['courses']?['name'])
+              ?.toString(),
       date: _Parse.dt(a['date']) ?? DateTime.now(),
       status: _attendanceStatus((a['status'] ?? 'present').toString()),
       notes: a['notes'] as String?,

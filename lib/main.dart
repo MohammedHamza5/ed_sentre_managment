@@ -93,45 +93,36 @@ class EdSentreApp extends StatelessWidget {
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settings, child) {
-          return Listener(
-            behavior: HitTestBehavior.translucent,
-            onPointerDown: (_) {
-              context.read<AuthBloc>().add(AuthInteractionDetected());
+          return ScreenUtilInit(
+            designSize: const Size(1440, 900),
+            minTextAdapt: true,
+            splitScreenMode: true,
+            builder: (context, child) {
+              return MaterialApp.router(
+                title: 'EdSentre - Center Management',
+                debugShowCheckedModeBanner: false,
+
+                // Language support
+                locale: settings.locale,
+                supportedLocales: const [Locale('ar'), Locale('en')],
+
+                // Localization delegates
+                localizationsDelegates: const [
+                  AppStringsDelegate(),
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+
+                // Themes
+                theme: LightTheme.theme,
+                darkTheme: DarkTheme.theme,
+                themeMode: settings.themeMode,
+
+                // Router
+                routerConfig: AppRouter.router,
+              );
             },
-            onPointerMove: (_) {
-              context.read<AuthBloc>().add(AuthInteractionDetected());
-            },
-            child: ScreenUtilInit(
-              designSize: const Size(1440, 900),
-              minTextAdapt: true,
-              splitScreenMode: true,
-              builder: (context, child) {
-                return MaterialApp.router(
-                  title: 'EdSentre - Center Management',
-                  debugShowCheckedModeBanner: false,
-
-                  // Language support
-                  locale: settings.locale,
-                  supportedLocales: const [Locale('ar'), Locale('en')],
-
-                  // Localization delegates
-                  localizationsDelegates: const [
-                    AppStringsDelegate(),
-                    GlobalMaterialLocalizations.delegate,
-                    GlobalWidgetsLocalizations.delegate,
-                    GlobalCupertinoLocalizations.delegate,
-                  ],
-
-                  // Themes
-                  theme: LightTheme.theme,
-                  darkTheme: DarkTheme.theme,
-                  themeMode: settings.themeMode,
-
-                  // Router
-                  routerConfig: AppRouter.router,
-                );
-              },
-            ),
           );
         },
       ),

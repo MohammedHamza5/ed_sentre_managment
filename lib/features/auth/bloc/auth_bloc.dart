@@ -65,8 +65,7 @@ class AuthSignupRequested extends AuthEvent {
   List<Object?> get props => [name, email, password, phone];
 }
 
-/// تم اكتشاف نشاط للمستخدم (لإعادة تعيين مؤقت الجلسة)
-class AuthInteractionDetected extends AuthEvent {}
+// Removed AuthInteractionDetected event
 
 // ═══════════════════════════════════════════════════════════════════════════
 // STATE
@@ -120,8 +119,6 @@ class AuthState extends Equatable {
 // ═══════════════════════════════════════════════════════════════════════════
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  Timer? _sessionTimer;
-  static const Duration _sessionTimeout = Duration(minutes: 30);
 
   AuthBloc() : super(const AuthState()) {
     on<AuthCheckRequested>(_onCheckRequested);
@@ -129,7 +126,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLogoutRequested>(_onLogoutRequested);
     on<AuthPasswordResetRequested>(_onPasswordResetRequested);
     on<AuthSignupRequested>(_onSignupRequested);
-    on<AuthInteractionDetected>(_onInteractionDetected);
 
     // الاستماع لتغييرات المصادقة
     _listenToAuthChanges();
@@ -170,7 +166,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             errorMessage: null,
           ),
         );
-        _startSessionTimer(); // Start timer on check success
       } else {
         emit(state.copyWith(status: AuthStatus.unauthenticated));
       }
@@ -206,7 +201,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           successMessage: 'تم تسجيل الدخول بنجاح',
         ),
       );
-      _startSessionTimer(); // Start timer on login success
     } else {
       emit(
         state.copyWith(
@@ -225,7 +219,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(state.copyWith(status: AuthStatus.loading));
 
     await AuthService.signOut();
-    _cancelSessionTimer(); // Cancel timer on logout
 
     emit(const AuthState(status: AuthStatus.unauthenticated));
   }
@@ -289,33 +282,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  void _onInteractionDetected(
-    AuthInteractionDetected event,
-    Emitter<AuthState> emit,
-  ) {
-    if (state.status == AuthStatus.authenticated) {
-      _startSessionTimer(); // Reset timer
-    }
-  }
-
-  void _startSessionTimer() {
-    _cancelSessionTimer();
-    _sessionTimer = Timer(_sessionTimeout, () {
-      add(AuthLogoutRequested());
-      // Optionally notify user via a specialized event or state
-    });
-  }
-
-  void _cancelSessionTimer() {
-    _sessionTimer?.cancel();
-    _sessionTimer = null;
-  }
-
-  @override
-  Future<void> close() {
-    _cancelSessionTimer();
-    return super.close();
-  }
 }
 
 

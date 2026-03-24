@@ -109,8 +109,19 @@ class _AddEditGroupDialogState extends State<AddEditGroupDialog> {
 
       if (mounted) {
         setState(() {
-          _courses = courses.map((s) => {'id': s.id, 'name': s.name}).toList();
-          _teachers = teachers;
+          // Use a Map to ensure unique items by ID
+          final uniqueCourses = <String, Map<String, dynamic>>{};
+          for (var s in courses) {
+            uniqueCourses[s.id] = {'id': s.id, 'name': s.name};
+          }
+          _courses = uniqueCourses.values.toList();
+
+          final uniqueTeachers = <String, Teacher>{};
+          for (var t in teachers) {
+            uniqueTeachers[t.id] = t;
+          }
+          _teachers = uniqueTeachers.values.toList();
+
           _rooms = rooms;
           _isLoadingData = false;
         });
@@ -292,7 +303,9 @@ class _AddEditGroupDialogState extends State<AddEditGroupDialog> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _selectedCourse,
+                    value: _courses.any((c) => c['id'] == _selectedCourse)
+                        ? _selectedCourse
+                        : null,
                     decoration: _inputDecoration('المادة', Icons.book),
                     items: _courses
                         .map(
@@ -311,7 +324,9 @@ class _AddEditGroupDialogState extends State<AddEditGroupDialog> {
                 SizedBox(width: 16.w),
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _selectedTeacher,
+                    value: _teachers.any((t) => t.id == _selectedTeacher)
+                        ? _selectedTeacher
+                        : null,
                     decoration: _inputDecoration('المعلم', Icons.person),
                     items: _teachers
                         .map(
@@ -330,7 +345,9 @@ class _AddEditGroupDialogState extends State<AddEditGroupDialog> {
             SizedBox(height: 20.h),
 
             DropdownButtonFormField<String>(
-              value: _selectedGrade,
+              value: EducationalStages.allGrades.contains(_selectedGrade)
+                  ? _selectedGrade
+                  : null,
               decoration: _inputDecoration('المرحلة الدراسية', Icons.school),
               items: EducationalStages.allGrades
                   .map((e) => DropdownMenuItem(value: e, child: Text(e)))
@@ -641,7 +658,9 @@ class _AddEditGroupDialogState extends State<AddEditGroupDialog> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: selectedRoomId,
+                value: _rooms.any((r) => r.id == selectedRoomId)
+                    ? selectedRoomId
+                    : null,
                 decoration: _inputDecoration('القاعة *', Icons.meeting_room),
                 items: _rooms
                     .map(

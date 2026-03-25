@@ -505,6 +505,33 @@ class GroupsRemoteSource {
           .select()
           .single();
 
+      // 4. Create Initial Invoice if fee > 0
+      final double monthlyFee = (groupData['monthly_fee'] as num?)?.toDouble() ?? 0.0;
+      if (monthlyFee > 0.0) {
+        final now = DateTime.now();
+        final invoiceData = {
+          'student_id': studentId,
+          'center_id': centerId,
+          'month': now.month,
+          'year': now.year,
+          'total_amount': monthlyFee,
+          'paid_amount': 0,
+          'discount_amount': 0,
+          'status': 'pending',
+          'due_date': now.add(const Duration(days: 7)).toIso8601String().split('T')[0],
+          'notes': 'تلقائي عند التسجيل في مجموعة ${groupData['group_name']}',
+        };
+        try {
+          await SupabaseClientManager.client
+              .from('student_invoices')
+              .insert(invoiceData);
+          debugPrint('   💰 فاتورة تم إنشاؤها بنجاح!');
+        } catch (invoiceError) {
+          debugPrint('   ⚠️ فشل إنشاء فاتورة: $invoiceError');
+          // Non-fatal, we don't throw!
+        }
+      }
+
       debugPrint('');
       debugPrint('✅ [Enrollment] تم التسجيل بنجاح!');
       debugPrint('   🎟️ Enrollment ID: ${response['id']}');

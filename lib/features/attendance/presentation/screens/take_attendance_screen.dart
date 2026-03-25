@@ -513,6 +513,13 @@ class _StudentRow extends StatelessWidget {
             isSelected: status == AttendanceStatus.late,
             onTap: () => onStatusChanged(AttendanceStatus.late),
           ),
+          const SizedBox(width: 8),
+          _StatusChip(
+            icon: Icons.sick_outlined,
+            color: Colors.purple,
+            isSelected: status == AttendanceStatus.excused,
+            onTap: () => onStatusChanged(AttendanceStatus.excused),
+          ),
         ],
       ),
     );

@@ -38,6 +38,8 @@ class _AddStudentScreenState extends State<AddStudentScreen>
   final _addressController = TextEditingController();
   final _parentNameController = TextEditingController();
   final _parentPhoneController = TextEditingController();
+  final _schoolNameController = TextEditingController();
+  final _academicYearController = TextEditingController();
 
   String? _selectedStage;
   DateTime? _selectedBirthDate;
@@ -83,6 +85,8 @@ class _AddStudentScreenState extends State<AddStudentScreen>
     _phoneController.text = s.phone;
     _emailController.text = s.email ?? '';
     _addressController.text = s.address;
+    _schoolNameController.text = s.schoolName ?? '';
+    _academicYearController.text = s.academicYear ?? '';
     _selectedStage = s.stage;
     _selectedBirthDate = s.birthDate;
 
@@ -143,6 +147,8 @@ class _AddStudentScreenState extends State<AddStudentScreen>
     _addressController.dispose();
     _parentNameController.dispose();
     _parentPhoneController.dispose();
+    _schoolNameController.dispose();
+    _academicYearController.dispose();
     _animController.dispose();
     super.dispose();
   }
@@ -192,6 +198,8 @@ class _AddStudentScreenState extends State<AddStudentScreen>
         createdAt: widget.student?.createdAt ?? DateTime.now(),
         lastAttendance: widget.student?.lastAttendance,
         subjectIds: _selectedSubjects.toList(),
+        schoolName: _schoolNameController.text.isEmpty ? null : _schoolNameController.text.trim(),
+        academicYear: _academicYearController.text.isEmpty ? null : _academicYearController.text.trim(),
       );
 
       final repo = context.read<StudentsRepository>();
@@ -1187,6 +1195,22 @@ class _AddStudentScreenState extends State<AddStudentScreen>
                     icon: Icons.location_on_outlined,
                     isDark: isDark,
                   ),
+                  const SizedBox(height: AppSpacing.lg),
+                  _buildPremiumTextField(
+                    controller: _schoolNameController,
+                    label: 'اسم المدرسة',
+                    hint: 'أدخل اسم المدرسة',
+                    icon: Icons.account_balance_outlined,
+                    isDark: isDark,
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  _buildPremiumTextField(
+                    controller: _academicYearController,
+                    label: 'العام الدراسي',
+                    hint: 'مثال: 2023-2024',
+                    icon: Icons.calendar_month_outlined,
+                    isDark: isDark,
+                  ),
                 ],
               ),
             ),
@@ -1385,6 +1409,8 @@ class _AddStudentScreenState extends State<AddStudentScreen>
         status: StudentStatus.active,
         createdAt: DateTime.now(),
         studentNumber: 'STD${DateTime.now().millisecondsSinceEpoch}',
+        schoolName: _schoolNameController.text.isEmpty ? null : _schoolNameController.text.trim(),
+        academicYear: _academicYearController.text.isEmpty ? null : _academicYearController.text.trim(),
       );
 
       debugPrint('\n${'=' * 60}');

@@ -51,6 +51,8 @@ class Student extends Equatable {
   final DateTime createdAt;
   final DateTime? lastAttendance;
   final String? gradeLevel;
+  final String? schoolName;
+  final String? academicYear;
 
   const Student({
     required this.id,
@@ -68,6 +70,8 @@ class Student extends Equatable {
     required this.createdAt,
     this.lastAttendance,
     this.gradeLevel,
+    this.schoolName,
+    this.academicYear,
   });
 
   @override
@@ -86,6 +90,8 @@ class Student extends Equatable {
     StudentStatus? status,
     DateTime? lastAttendance,
     String? gradeLevel,
+    String? schoolName,
+    String? academicYear,
   }) {
     return Student(
       id: id,
@@ -102,6 +108,8 @@ class Student extends Equatable {
       createdAt: createdAt,
       lastAttendance: lastAttendance ?? this.lastAttendance,
       gradeLevel: gradeLevel ?? this.gradeLevel,
+      schoolName: schoolName ?? this.schoolName,
+      academicYear: academicYear ?? this.academicYear,
     );
   }
   Map<String, dynamic> toJson() {
@@ -121,6 +129,8 @@ class Student extends Equatable {
       'created_at': createdAt.toIso8601String(),
       'last_attendance': lastAttendance?.toIso8601String(),
       'grade_level': gradeLevel,
+      'school_name': schoolName,
+      'academic_year': academicYear,
     };
   }
 
@@ -159,6 +169,8 @@ class Student extends Equatable {
       createdAt: parseDate(json['created_at']) ?? DateTime.now(),
       lastAttendance: parseDate(json['last_attendance']),
       gradeLevel: json['grade_level'] as String?,
+      schoolName: json['school_name'] as String?,
+      academicYear: json['academic_year'] as String?,
     );
   }
 

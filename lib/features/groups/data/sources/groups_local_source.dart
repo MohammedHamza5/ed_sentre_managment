@@ -47,6 +47,15 @@ class GroupsLocalSource {
     if (timeStr == null) return null;
     return DateTime.tryParse(timeStr);
   }
+
+  /// Clears the cache timestamp, forcing the next getGroups call
+  /// to fetch from remote instead of returning stale cached data.
+  Future<void> clearCacheTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = await _composeKey(_keyGroups);
+    await prefs.remove('${key}_timestamp');
+    debugPrint('🗑️ [GroupsLocal] Cache time cleared — next read will fetch remote');
+  }
 }
 
 

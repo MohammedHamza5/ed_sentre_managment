@@ -14,6 +14,7 @@ import 'core/supabase/supabase_client.dart';
 import 'core/theme/dark_theme.dart';
 import 'core/theme/light_theme.dart';
 import 'core/services/permission_service.dart';
+import 'core/services/notification_service.dart';
 import 'features/auth/bloc/auth_bloc.dart';
 import 'features/teachers/bloc/teachers_bloc.dart';
 import 'features/teachers/data/repositories/teachers_repository.dart';
@@ -38,6 +39,9 @@ Future<void> main() async {
   // تهيئة خدمات Offline
   await LocalCacheService().initialize();
   NetworkMonitor().startMonitoring();
+
+  // تهيئة خدمة الإشعارات
+  await NotificationService().initialize();
 
   // Run app
   runApp(const EdSentreApp());

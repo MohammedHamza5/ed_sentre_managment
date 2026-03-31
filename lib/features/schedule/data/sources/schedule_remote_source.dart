@@ -31,9 +31,11 @@ class ScheduleRemoteSource {
           .select('''
             *,
             classrooms:classroom_id(name),
-            groups:group_id(group_name)
+            groups:group_id(group_name, deleted_at)
           ''')
-          .eq('center_id', centerId);
+          .eq('center_id', centerId)
+          .filter('deleted_at', 'is', null)
+          .neq('status', 'cancelled');
 
       // 2. Prepare Sets for manual fetching
       final Set<String> courseIds = {};
@@ -80,9 +82,13 @@ class ScheduleRemoteSource {
         }
       }
 
-      // 5. Build Result List
+      // 5. Build Result List — skip schedules for deleted groups
       final List<ScheduleSession> sessions = [];
       for (final json in response) {
+        // Skip if the group was soft-deleted
+        final groupData = json['groups'];
+        if (groupData != null && groupData['deleted_at'] != null) continue;
+
         // Extract nested data
         final courseId = json['course_id'] as String?;
         final teacherId = json['teacher_id'] as String?;
@@ -90,7 +96,7 @@ class ScheduleRemoteSource {
         final courseName = courseNamesMap[courseId] ?? '';
         final teacherName = teacherNamesMap[teacherId] ?? '';
         final classroomName = json['classrooms']?['name'] ?? '';
-        final groupName = json['groups']?['group_name'] ?? '';
+        final groupName = groupData?['group_name'] ?? '';
 
         // Create enriched JSON
         final Map<String, dynamic> enrichedJson = {

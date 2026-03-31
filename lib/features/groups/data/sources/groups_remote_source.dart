@@ -382,10 +382,24 @@ class GroupsRemoteSource {
 
   Future<void> deleteGroup(String id) async {
     try {
-      await SupabaseClientManager.client
-          .from('groups')
-          .update({'deleted_at': DateTime.now().toIso8601String()})
-          .eq('id', id);
+      final centerId = await _getCenterId();
+      if (centerId == null) throw Exception('Center ID غير موجود');
+
+      final user = SupabaseClientManager.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      // NOTE: Using the safe_delete_group RPC to cascade:
+      // 1. Drop all students from group
+      // 2. Cancel future schedules
+      // 3. Soft delete + audit log
+      await SupabaseClientManager.client.rpc(
+        'safe_delete_group',
+        params: {
+          'p_group_id': id,
+          'p_center_id': centerId,
+          'p_deleted_by': user.id,
+        },
+      );
     } catch (e) {
       debugPrint('❌ [GroupsRemote] Error: $e');
       rethrow;

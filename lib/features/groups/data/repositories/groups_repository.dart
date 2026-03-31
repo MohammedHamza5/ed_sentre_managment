@@ -139,9 +139,12 @@ class GroupsRepository {
     }
     await _remoteSource.deleteGroup(id);
 
+    // NOTE: Immediately clear local cache so all screens see fresh data
+    // without waiting for the 5-minute TTL to expire
     final currentList = await _localSource.getGroups();
     currentList.removeWhere((g) => g.id == id);
     await _localSource.saveGroups(currentList);
+    await _localSource.clearCacheTime();
   }
 
   Future<List<StudentGroupEnrollment>> getGroupEnrollments(

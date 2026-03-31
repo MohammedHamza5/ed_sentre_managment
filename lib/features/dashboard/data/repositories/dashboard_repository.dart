@@ -15,7 +15,9 @@ class DashboardRepository {
   final NetworkMonitor _networkMonitor;
 
   /// مدة صلاحية الـ Cache — بعدها يُعاد الجلب من الـ Server
-  static const Duration _cacheTTL = Duration(hours: 24);
+  // NOTE: Reduced from 24h to 2min so dashboard counts update
+  // promptly after data mutations (delete student, group, etc.)
+  static const Duration _cacheTTL = Duration(minutes: 2);
 
   /// مفاتيح SharedPreferences
   static const String _cacheDataKey = 'dashboard_cache_data';

@@ -538,7 +538,7 @@ class StudentsRemoteSource {
       return await getStudentSubjectsWithTeachers(studentId);
     } catch (e) {
       debugPrint('❌ [updateStudentSubjects] Error: $e');
-      throw e;
+      rethrow;
     }
   }
 }

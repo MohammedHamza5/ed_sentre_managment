@@ -118,7 +118,7 @@ class NotificationHelper {
       userId: parentUserId,
       centerId: centerId,
       title: '⚠️ فاتورة متأخرة',
-      body: 'لديك فاتورة متأخرة بقيمة $amount جنيه (${daysOverdue} يوم)',
+      body: 'لديك فاتورة متأخرة بقيمة $amount جنيه ($daysOverdue يوم)',
       type: 'payment',
       priority: 'critical',
       targetApp: 'parent',
@@ -212,13 +212,16 @@ class NotificationHelper {
     required String body,
   }) async {
     try {
-      await _client.rpc('create_notification_for_center', params: {
-        'p_center_id': centerId,
-        'p_title': '📢 $title',
-        'p_body': body,
-        'p_type': 'announcement',
-        'p_target_app': 'all',
-      });
+      await _client.rpc(
+        'create_notification_for_center',
+        params: {
+          'p_center_id': centerId,
+          'p_title': '📢 $title',
+          'p_body': body,
+          'p_type': 'announcement',
+          'p_target_app': 'all',
+        },
+      );
     } catch (e) {
       debugPrint('⚠️ [NotificationHelper] Failed to send announcement: $e');
     }
@@ -233,14 +236,17 @@ class NotificationHelper {
     Map<String, dynamic>? data,
   }) async {
     try {
-      await _client.rpc('create_notification_for_group', params: {
-        'p_group_id': groupId,
-        'p_title': title,
-        'p_body': body,
-        'p_type': type,
-        'p_data': data ?? {},
-        'p_target_app': 'student',
-      });
+      await _client.rpc(
+        'create_notification_for_group',
+        params: {
+          'p_group_id': groupId,
+          'p_title': title,
+          'p_body': body,
+          'p_type': type,
+          'p_data': data ?? {},
+          'p_target_app': 'student',
+        },
+      );
     } catch (e) {
       debugPrint('⚠️ [NotificationHelper] Failed to notify group: $e');
     }
@@ -256,14 +262,17 @@ class NotificationHelper {
     Map<String, dynamic>? data,
   }) async {
     try {
-      await _client.rpc('create_notification_for_student_parents', params: {
-        'p_student_id': studentId,
-        'p_center_id': centerId,
-        'p_title': title,
-        'p_body': body,
-        'p_type': type,
-        'p_data': data ?? {},
-      });
+      await _client.rpc(
+        'create_notification_for_student_parents',
+        params: {
+          'p_student_id': studentId,
+          'p_center_id': centerId,
+          'p_title': title,
+          'p_body': body,
+          'p_type': type,
+          'p_data': data ?? {},
+        },
+      );
     } catch (e) {
       debugPrint('⚠️ [NotificationHelper] Failed to notify parents: $e');
     }
@@ -314,16 +323,19 @@ class NotificationHelper {
     Map<String, dynamic>? data,
   }) async {
     try {
-      await _client.rpc('create_notification_for_users', params: {
-        'p_user_ids': userIds,
-        'p_center_id': centerId,
-        'p_title': title,
-        'p_body': body,
-        'p_type': type,
-        'p_priority': priority,
-        'p_target_app': targetApp,
-        'p_data': data ?? {},
-      });
+      await _client.rpc(
+        'create_notification_for_users',
+        params: {
+          'p_user_ids': userIds,
+          'p_center_id': centerId,
+          'p_title': title,
+          'p_body': body,
+          'p_type': type,
+          'p_priority': priority,
+          'p_target_app': targetApp,
+          'p_data': data ?? {},
+        },
+      );
     } catch (e) {
       debugPrint(
         '⚠️ [NotificationHelper] Failed to create bulk notification: $e',

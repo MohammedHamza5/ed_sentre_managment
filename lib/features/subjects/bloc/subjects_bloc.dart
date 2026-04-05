@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../../shared/models/models.dart';
-import '../../../shared/models/pricing_models.dart';
 import '../data/repositories/subjects_repository.dart';
 import '../../teachers/data/repositories/teachers_repository.dart';
 import '../../settings/data/sources/settings_remote_source.dart';

@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import '../../../shared/models/models.dart';
 // import '../../../shared/data/supabase_repository.dart'; // Removed
-import '../../attendance/presentation/screens/qr_attendance_screen.dart';
 import '../../attendance/presentation/screens/take_attendance_screen.dart';
 import '../data/repositories/groups_repository.dart';
 import '../../rooms/data/repositories/rooms_repository.dart'; // Added

@@ -42,8 +42,8 @@ class ScheduleRemoteSource {
       final Set<String> teacherIds = {};
 
       for (final json in response as List) {
-         if (json['course_id'] != null) courseIds.add(json['course_id']);
-         if (json['teacher_id'] != null) teacherIds.add(json['teacher_id']);
+        if (json['course_id'] != null) courseIds.add(json['course_id']);
+        if (json['teacher_id'] != null) teacherIds.add(json['teacher_id']);
       }
 
       // 3. Manual Fetch: Courses
@@ -54,7 +54,7 @@ class ScheduleRemoteSource {
               .from('courses')
               .select('id, name')
               .filter('id', 'in', courseIds.toList());
-          
+
           for (final c in coursesData as List) {
             courseNamesMap[c['id']] = c['name'] as String;
           }
@@ -71,7 +71,7 @@ class ScheduleRemoteSource {
               .from('teachers')
               .select('id, users(full_name)')
               .filter('id', 'in', teacherIds.toList());
-          
+
           for (final t in teachersData as List) {
             final tId = t['id'] as String;
             final tName = t['users']?['full_name'] as String? ?? '';
@@ -92,7 +92,7 @@ class ScheduleRemoteSource {
         // Extract nested data
         final courseId = json['course_id'] as String?;
         final teacherId = json['teacher_id'] as String?;
-        
+
         final courseName = courseNamesMap[courseId] ?? '';
         final teacherName = teacherNamesMap[teacherId] ?? '';
         final classroomName = json['classrooms']?['name'] ?? '';
@@ -100,16 +100,16 @@ class ScheduleRemoteSource {
 
         // Create enriched JSON
         final Map<String, dynamic> enrichedJson = {
-          ...(json as Map<String, dynamic>),
+          ...json,
           'subject_name': courseName,
           'teacher_name': teacherName,
           'room_name': classroomName,
           'group_name': groupName,
         };
-        
+
         sessions.add(ScheduleMapper.fromSupabase(enrichedJson));
       }
-      
+
       return sessions;
     } catch (e) {
       debugPrint('❌ [ScheduleRemote] Error: $e');
@@ -236,5 +236,3 @@ class ScheduleRemoteSource {
     return int.parse(parts[0]) * 60 + int.parse(parts[1]);
   }
 }
-
-

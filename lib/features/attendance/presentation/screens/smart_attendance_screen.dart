@@ -296,7 +296,7 @@ class _SmartAttendanceScreenState extends State<SmartAttendanceScreen> {
         ),
         SizedBox(height: 8.h),
         Text(
-          'نسبة الحضور: ${rate}%',
+          'نسبة الحضور: $rate%',
           style: TextStyle(color: Colors.grey[600], fontSize: 12.sp),
         ),
       ],

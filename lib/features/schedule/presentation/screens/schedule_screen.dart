@@ -1110,8 +1110,10 @@ class _ScheduleViewState extends State<_ScheduleView> {
           // 🔍 Filter Groups based on selection
           // Only show active groups that match the subject/teacher if selected
           List<Group> filteredGroups = state.groups.where((g) {
-            if (g.status != GroupStatus.active && g.status != GroupStatus.full)
+            if (g.status != GroupStatus.active &&
+                g.status != GroupStatus.full) {
               return false;
+            }
 
             bool matchesSubject =
                 selectedSubject == null || g.courseId == selectedSubject;
@@ -1452,7 +1454,9 @@ class _ScheduleViewState extends State<_ScheduleView> {
                               helperText:
                                   filteredTeachers.length <
                                       state.teachers.length
-                                  ? '${strings.isArabic ? 'فلترة حسب المادة المختارة' : 'Filtered by Subject'}'
+                                  ? strings.isArabic
+                                        ? 'فلترة حسب المادة المختارة'
+                                        : 'Filtered by Subject'
                                   : null,
                               helperStyle: TextStyle(
                                 color: subjectColor,

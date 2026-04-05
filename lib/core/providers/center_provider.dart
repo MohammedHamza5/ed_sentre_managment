@@ -428,8 +428,9 @@ class CenterProvider extends ChangeNotifier {
       if (phone != null) updates['phone'] = phone;
       if (email != null) updates['email'] = email;
       if (licenseNumber != null) updates['license_number'] = licenseNumber;
-      if (subscriptionType != null)
+      if (subscriptionType != null) {
         updates['subscription_type'] = subscriptionType;
+      }
 
       if (updates.isNotEmpty) {
         updates['updated_at'] = DateTime.now().toIso8601String();

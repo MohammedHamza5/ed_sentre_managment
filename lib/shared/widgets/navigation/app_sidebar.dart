@@ -626,8 +626,9 @@ class _SidebarItemState extends State<_SidebarItem>
           Consumer<CenterProvider>(
             // Import provider
             builder: (context, provider, child) {
-              if (provider.unreadNotificationsCount == 0)
+              if (provider.unreadNotificationsCount == 0) {
                 return const SizedBox();
+              }
               return Positioned(
                 top: -2.h,
                 right: -2.w,

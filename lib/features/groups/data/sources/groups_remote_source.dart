@@ -244,7 +244,7 @@ class GroupsRemoteSource {
             await SupabaseClientManager.client
                 .from('groups')
                 .delete()
-                .eq('id', newGroupId!);
+                .eq('id', newGroupId);
             debugPrint('🔄 [GroupsRemote] Group rolled back successfully');
           } catch (rollbackError) {
             debugPrint('⚠️ [GroupsRemote] Rollback failed: $rollbackError');
@@ -520,7 +520,8 @@ class GroupsRemoteSource {
           .single();
 
       // 4. Create Initial Invoice if fee > 0
-      final double monthlyFee = (groupData['monthly_fee'] as num?)?.toDouble() ?? 0.0;
+      final double monthlyFee =
+          (groupData['monthly_fee'] as num?)?.toDouble() ?? 0.0;
       if (monthlyFee > 0.0) {
         final now = DateTime.now();
         final invoiceData = {
@@ -532,7 +533,10 @@ class GroupsRemoteSource {
           'paid_amount': 0,
           'discount_amount': 0,
           'status': 'pending',
-          'due_date': now.add(const Duration(days: 7)).toIso8601String().split('T')[0],
+          'due_date': now
+              .add(const Duration(days: 7))
+              .toIso8601String()
+              .split('T')[0],
           'notes': 'تلقائي عند التسجيل في مجموعة ${groupData['group_name']}',
         };
         try {

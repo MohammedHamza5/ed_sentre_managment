@@ -5,14 +5,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/l10n/app_strings.dart';
-import '../../../../core/utils/form_validators.dart';
 import '../../../../core/providers/center_provider.dart';
 import '../../../../shared/models/models.dart';
 import '../../../schedule/data/repositories/schedule_repository.dart';
 import '../../data/repositories/teachers_repository.dart';
 import '../../bloc/teachers_bloc.dart';
 import 'teacher_salaries_screen.dart';
-import 'teacher_financial_settings_screen.dart';
 import 'teacher_statistics_screen.dart';
 
 /// شاشة إدارة المعلمين
@@ -1648,9 +1646,9 @@ class _TableCol extends StatelessWidget {
 
   const _TableCol({
     required this.child,
-    this.width,
     this.flex,
     this.alignment = Alignment.centerLeft,
+    this.width,
   });
 
   @override
@@ -1720,8 +1718,9 @@ class _TeacherRowState extends State<_TeacherRow> {
               })
               .take(2)
               .toList();
-    if (widget.teacher.subjectIds.length > 2)
+    if (widget.teacher.subjectIds.length > 2) {
       subjectNames.add('+${widget.teacher.subjectIds.length - 2}');
+    }
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -1999,10 +1998,11 @@ class _TeacherRowState extends State<_TeacherRow> {
                       onSelected: (val) {
                         if (val == 'edit') widget.onEdit();
                         if (val == 'code') _showInvitationCode();
-                        if (val == 'status')
+                        if (val == 'status') {
                           isInactive
                               ? widget.onReactivate()
                               : widget.onDeactivate();
+                        }
                         if (val == 'delete') widget.onDelete();
                       },
                       itemBuilder: (context) => [

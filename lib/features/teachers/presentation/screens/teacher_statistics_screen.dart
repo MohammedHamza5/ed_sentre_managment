@@ -429,7 +429,7 @@ class _TeacherStatisticsScreenState extends State<TeacherStatisticsScreen>
           child: _buildSummaryCard(
             isDark,
             '💰',
-            '${totalRevenue.toStringAsFixed(0)}',
+            totalRevenue.toStringAsFixed(0),
             'جنيه',
             const Color(0xFFEC4899),
           ),

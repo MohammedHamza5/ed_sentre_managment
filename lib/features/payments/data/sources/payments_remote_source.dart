@@ -385,7 +385,7 @@ class PaymentsRemoteSource {
       debugPrint('✅ [PaymentsRemote] Payment Recorded Successfully');
     } catch (e) {
       debugPrint('❌ [PaymentsRemote] addPaymentToInvoice Error: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -397,7 +397,7 @@ class PaymentsRemoteSource {
       );
     } catch (e) {
       debugPrint('❌ [PaymentsRemote] recalculateInvoice Error: $e');
-      throw e;
+      rethrow;
     }
   }
 

@@ -1,5 +1,7 @@
 /// Form Validation Utilities
 /// أدوات التحقق من صحة البيانات
+library;
+
 import '../constants/educational_consts.dart';
 
 class FormValidators {

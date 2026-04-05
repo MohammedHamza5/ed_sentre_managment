@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../../../../core/supabase/supabase_client.dart';
+import '../../../../core/services/notification_helper.dart';
 import '../../../../shared/models/models.dart';
 import '../../../../shared/data/mappers.dart';
 import '../../../../core/supabase/auth_service.dart';
@@ -157,6 +158,28 @@ class PaymentsRemoteSource {
         paymentMethod: payment.method.name,
         notes: payment.notes,
       );
+
+      // NOTE: Notify parent about payment — fire-and-forget.
+      try {
+        final studentRes = await SupabaseClientManager.client
+            .from('students')
+            .select('parent_id, parents(user_id)')
+            .eq('id', payment.studentId)
+            .maybeSingle();
+
+        final parentUserId =
+            (studentRes?['parents'] as Map<String, dynamic>?)?['user_id'] as String?;
+
+        if (parentUserId != null) {
+          await NotificationHelper.notifyPaymentRecorded(
+            parentUserId: parentUserId,
+            amount: payment.amount,
+            centerId: centerId,
+          );
+        }
+      } catch (e) {
+        debugPrint('⚠️ [PaymentsRemote] Payment notification failed: $e');
+      }
 
       // Return the payment with updated info
       return payment.copyWith(id: invoiceId, status: PaymentStatus.paid);

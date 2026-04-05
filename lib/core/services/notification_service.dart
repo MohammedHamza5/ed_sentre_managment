@@ -12,6 +12,8 @@ import '../supabase/supabase_client.dart';
 /// يستخدم Supabase Realtime للاستماع لإشعارات جديدة
 /// + flutter_local_notifications لعرض إشعار محلي على Desktop
 /// + تسجيل device token لربط الجهاز بالمستخدم
+///
+/// NOTE: Desktop لا يدعم FCM Push — لذلك نعتمد على Realtime فقط
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
@@ -74,20 +76,22 @@ class NotificationService {
   }
 
   /// تسجيل توكن الجهاز في Supabase
+  /// NOTE: Desktop لا يدعم FCM — نستخدم معرف فريد من user_id + platform
   Future<void> _registerDeviceToken() async {
     final user = SupabaseClientManager.currentUser;
     if (user == null) return;
 
     try {
-      // NOTE: للـ Desktop نستخدم user_id كمعرف فريد بدل FCM Token
       final deviceToken = '${user.id}_desktop_${Platform.operatingSystem}';
 
-      await SupabaseClientManager.client.rpc('upsert_device_token', params: {
-        'p_token': deviceToken,
-        'p_platform': Platform.operatingSystem,
-        'p_device_type': 'desktop',
-        'p_app_type': 'admin',
-      });
+      await SupabaseClientManager.client.from('device_tokens').upsert({
+        'user_id': user.id,
+        'fcm_token': deviceToken,
+        'platform': Platform.operatingSystem,
+        'app_type': 'admin',
+        'last_active': DateTime.now().toIso8601String(),
+      }, onConflict: 'fcm_token');
+
       debugPrint('✅ [NotificationService] Device token registered');
     } catch (e) {
       debugPrint('⚠️ [NotificationService] Failed to register token: $e');
@@ -101,9 +105,10 @@ class NotificationService {
 
     try {
       final deviceToken = '${user.id}_desktop_${Platform.operatingSystem}';
-      await SupabaseClientManager.client.rpc('deactivate_device_token', params: {
-        'p_token': deviceToken,
-      });
+      await SupabaseClientManager.client
+          .from('device_tokens')
+          .delete()
+          .eq('fcm_token', deviceToken);
     } catch (e) {
       debugPrint('⚠️ [NotificationService] Failed to deactivate token: $e');
     }
@@ -154,21 +159,27 @@ class NotificationService {
     );
 
     await _localNotifications.show(
-      notification['id'].toString().hashCode,
+      notification['id']?.toString().hashCode ?? DateTime.now().millisecond,
       notification['title'] ?? 'إشعار جديد',
       notification['body'] ?? '',
       details,
-      payload: notification['data']?.toString(),
+      payload: notification['data_payload']?.toString(),
     );
   }
 
   /// تحديث عدد الإشعارات غير المقروءة
   Future<void> _updateUnreadCount() async {
     try {
-      final count = await SupabaseClientManager.client.rpc(
-        'get_unread_notifications_count',
-      );
-      _unreadCountController.add(count as int);
+      final user = SupabaseClientManager.currentUser;
+      if (user == null) return;
+
+      final data = await SupabaseClientManager.client
+          .from('notifications')
+          .select()
+          .eq('user_id', user.id)
+          .eq('is_read', false);
+
+      _unreadCountController.add((data as List).length);
     } catch (e) {
       debugPrint('⚠️ [NotificationService] Failed to update count: $e');
     }

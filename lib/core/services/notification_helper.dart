@@ -126,6 +126,25 @@ class NotificationHelper {
     );
   }
 
+  /// إشعار: تذكير بدفع قسط
+  static Future<void> notifyPaymentReminder({
+    required String parentUserId,
+    required double amount,
+    required String month,
+    required String centerId,
+  }) async {
+    await _createNotification(
+      userId: parentUserId,
+      centerId: centerId,
+      title: '💳 موعد دفع القسط',
+      body: 'نذكركم باقتراب موعد قسط شهر $month بقيمة $amount جنيه',
+      type: 'payment',
+      priority: 'high',
+      targetApp: 'parent',
+      data: {'route': '/payments'},
+    );
+  }
+
   // ═══════════════════════════════════════════════════════════════════════════
   // إشعارات الجدول والحصص
   // ═══════════════════════════════════════════════════════════════════════════
@@ -198,6 +217,24 @@ class NotificationHelper {
       body: 'تم تسجيل راتبك لشهر $month بقيمة $amount جنيه',
       type: 'payment',
       targetApp: 'teacher',
+    );
+  }
+
+  /// إشعار: انضمام طالب جديد لمجموعة المعلم
+  static Future<void> notifyTeacherNewStudent({
+    required String teacherUserId,
+    required String studentName,
+    required String groupName,
+    required String centerId,
+  }) async {
+    await _createNotification(
+      userId: teacherUserId,
+      centerId: centerId,
+      title: '👋 طالب جديد في جروب $groupName',
+      body: 'تم إضافة الطالب $studentName إلى مجموعة $groupName',
+      type: 'group',
+      targetApp: 'teacher',
+      data: {'route': '/groups'},
     );
   }
 
@@ -303,7 +340,7 @@ class NotificationHelper {
         'type': type,
         'priority': priority,
         'target_app': targetApp,
-        'data': data ?? {},
+        'data_payload': data ?? {},
         'is_read': false,
       });
     } catch (e) {

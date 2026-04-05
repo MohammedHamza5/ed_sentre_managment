@@ -153,6 +153,21 @@ class ScheduleRemoteSource {
           .from('schedules')
           .update(data)
           .eq('id', session.id);
+
+      // Notify the group (Students and Parents) via RPC
+      if (session.groupId != null) {
+        try {
+          await SupabaseClientManager.client.rpc('notify_group_schedule_change', params: {
+            'p_group_id': session.groupId,
+            'p_title': '📅 تحديث في موعد الحصة',
+            'p_body': 'تم تحديث موعد الحصة. يرجى التحقق من الجدول.',
+            'p_type': 'schedule',
+            'p_center_id': centerId,
+          });
+        } catch (e) {
+          debugPrint('⚠️ [ScheduleRemote] Update Notification failed: $e');
+        }
+      }
     } catch (e) {
       debugPrint('❌ [ScheduleRemote] Update Error: $e');
       rethrow;
@@ -161,10 +176,41 @@ class ScheduleRemoteSource {
 
   Future<void> deleteSession(String id) async {
     try {
+      // 1. Fetch the group_id and course_name before deletion for notification
+      String? groupId;
+      String? courseName;
+      String? centerId;
+      try {
+        final sessionRes = await SupabaseClientManager.client
+            .from('schedules')
+            .select('group_id, center_id, courses(name)')
+            .eq('id', id)
+            .maybeSingle();
+        groupId = sessionRes?['group_id'] as String?;
+        centerId = sessionRes?['center_id'] as String?;
+        courseName = (sessionRes?['courses'] as Map<String, dynamic>?)?['name'] as String?;
+      } catch (_) {}
+
+      // 2. Perform deletion
       await SupabaseClientManager.client
           .from('schedules')
           .delete()
           .eq('id', id);
+
+      // 3. Notify the group (Students and Parents) via RPC
+      if (groupId != null && centerId != null) {
+        try {
+          await SupabaseClientManager.client.rpc('notify_group_schedule_change', params: {
+            'p_group_id': groupId,
+            'p_title': '🚨 حصة ملغاة',
+            'p_body': 'تم إلغاء حصة ${courseName ?? 'المادة'} من جانب السنتر.',
+            'p_type': 'schedule',
+            'p_center_id': centerId,
+          });
+        } catch (e) {
+          debugPrint('⚠️ [ScheduleRemote] Delete Notification failed: $e');
+        }
+      }
     } catch (e) {
       debugPrint('❌ [ScheduleRemote] Delete Error: $e');
       rethrow;

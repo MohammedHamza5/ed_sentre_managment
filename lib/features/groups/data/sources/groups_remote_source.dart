@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/supabase/supabase_client.dart';
+import '../../../../core/services/notification_helper.dart';
 import '../../../../shared/models/models.dart';
 import '../../../../core/supabase/auth_service.dart';
 import '../../models/smart_enrollment_models.dart';
@@ -17,6 +18,20 @@ class GroupsRemoteSource {
     if (user == null) return null;
     return user.userMetadata?['center_id'] ??
         user.userMetadata?['default_center_id'];
+  }
+
+  /// Get teacher's user_id from a group (for notifications)
+  Future<String?> _getTeacherUserIdFromGroup(String groupId) async {
+    try {
+      final groupRes = await SupabaseClientManager.client
+          .from('groups')
+          .select('teachers!inner(user_id)')
+          .eq('id', groupId)
+          .maybeSingle();
+      return (groupRes?['teachers'] as Map<String, dynamic>?)?['user_id'] as String?;
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<List<Group>> getGroups({
@@ -559,6 +574,55 @@ class GroupsRemoteSource {
       );
       debugPrint('');
 
+      // NOTE: Notifications are fire-and-forget — don't block enrollment on failure.
+      try {
+        // Get student user_id and name for notification
+        final studentRes = await SupabaseClientManager.client
+            .from('students')
+            .select('user_id, full_name')
+            .eq('id', studentId)
+            .maybeSingle();
+
+        final studentUserId = studentRes?['user_id'] as String?;
+        final studentName = studentRes?['full_name'] as String? ?? 'طالب';
+        final groupName = groupData['group_name'] as String? ?? 'مجموعة';
+
+        // Get course name
+        final courseId = groupData['course_id'] as String?;
+        String courseName = 'مادة';
+        if (courseId != null) {
+          final courseRes = await SupabaseClientManager.client
+              .from('courses')
+              .select('name')
+              .eq('id', courseId)
+              .maybeSingle();
+          courseName = courseRes?['name'] as String? ?? 'مادة';
+        }
+
+        // 1. Notify student about group enrollment
+        if (studentUserId != null) {
+          await NotificationHelper.notifyStudentAddedToGroup(
+            studentUserId: studentUserId,
+            groupName: groupName,
+            courseName: courseName,
+            centerId: centerId,
+          );
+        }
+
+        // 2. Notify teacher about new student in their group
+        final groupTeacherId = await _getTeacherUserIdFromGroup(groupId);
+        if (groupTeacherId != null) {
+          await NotificationHelper.notifyTeacherNewStudent(
+            teacherUserId: groupTeacherId,
+            studentName: studentName,
+            groupName: groupName,
+            centerId: centerId,
+          );
+        }
+      } catch (e) {
+        debugPrint('⚠️ [Enrollment] Notification failed (non-fatal): $e');
+      }
+
       return response['id'] as String;
     } catch (e) {
       debugPrint('❌ [enrollStudentInGroup] Error: $e');
@@ -605,6 +669,19 @@ class GroupsRemoteSource {
     String? reason,
   }) async {
     try {
+      // Get group name before withdrawal for notification
+      String groupName = 'مجموعة';
+      String? centerId;
+      try {
+        final groupRes = await SupabaseClientManager.client
+            .from('groups')
+            .select('group_name, center_id')
+            .eq('id', groupId)
+            .maybeSingle();
+        groupName = groupRes?['group_name'] as String? ?? 'مجموعة';
+        centerId = groupRes?['center_id'] as String?;
+      } catch (_) {}
+
       await SupabaseClientManager.client
           .from('student_group_enrollments')
           .update({
@@ -615,6 +692,25 @@ class GroupsRemoteSource {
           .eq('student_id', studentId)
           .eq('group_id', groupId)
           .eq('status', 'active');
+
+      // NOTE: Notify student about removal — fire-and-forget.
+      try {
+        final studentRes = await SupabaseClientManager.client
+            .from('students')
+            .select('user_id')
+            .eq('id', studentId)
+            .maybeSingle();
+        final studentUserId = studentRes?['user_id'] as String?;
+        if (studentUserId != null && centerId != null) {
+          await NotificationHelper.notifyStudentRemovedFromGroup(
+            studentUserId: studentUserId,
+            groupName: groupName,
+            centerId: centerId,
+          );
+        }
+      } catch (e) {
+        debugPrint('⚠️ [Withdraw] Notification failed (non-fatal): $e');
+      }
     } catch (e) {
       debugPrint('❌ [withdrawStudentFromGroup] Error: $e');
       rethrow;

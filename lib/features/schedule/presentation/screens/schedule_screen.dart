@@ -9,7 +9,7 @@ import '../../../../core/providers/center_provider.dart';
 import '../../../../shared/models/models.dart';
 import '../../logic/schedule_validator.dart';
 import '../../bloc/schedule_bloc.dart';
-import '../../../../shared/models/group_models.dart'; // Ensure Group models are imported
+// Ensure Group models are imported
 import '../../data/repositories/schedule_repository.dart';
 import '../../../groups/data/repositories/groups_repository.dart'; // Added missing import
 import '../../../subjects/data/repositories/subjects_repository.dart';
